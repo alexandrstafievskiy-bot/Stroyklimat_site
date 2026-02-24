@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Тест міграції в IndexedDB</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .test-panel {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1 { color: #333; }
+    h2 { color: #2f7de1; margin-top: 0; }
+    .log { 
+      background: #1a1f35; 
+      color: #00ff00; 
+      padding: 15px; 
+      border-radius: 5px; 
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      max-height: 400px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+    .btn {
+      background: #2f7de1;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+      font-size: 14px;
+    }
+    .btn:hover { background: #1e5bb8; }
+    .btn.danger { background: #e74c3c; }
+    .btn.danger:hover { background: #c0392b; }
+    .status { 
+      padding: 10px; 
+      border-radius: 5px; 
+      margin: 10px 0;
+    }
+    .status.success { background: #d4edda; color: #155724; }
+    .status.error { background: #f8d7da; color: #721c24; }
+    .status.warning { background: #fff3cd; color: #856404; }
+    .status.info { background: #d1ecf1; color: #0c5460; }
+  </style>
+</head>
+<body>
+  <h1>🔧 Тест міграції каталогу в IndexedDB</h1>
+  
+  <div class="test-panel">
+    <h2>1️⃣ Стан localStorage</h2>
+    <div id="localStorageStatus"></div>
+    <button class="btn" onclick="checkLocalStorage()">🔍 Перевірити localStorage</button>
+    <button class="btn danger" onclick="clearLocalStorage()">🗑️ Очистити localStorage</button>
+  </div>
+
+  <div class="test-panel">
+    <h2>2️⃣ Стан IndexedDB</h2>
+    <div id="indexedDBStatus"></div>
+    <button class="btn" onclick="checkIndexedDB()">🔍 Перевірити IndexedDB</button>
+    <button class="btn danger" onclick="deleteIndexedDB()">🗑️ Видалити IndexedDB</button>
+  </div>
+
+  <div class="test-panel">
+    <h2>3️⃣ Тест міграції</h2>
+    <button class="btn" onclick="simulateMigration()">▶️ Запустити міграцію</button>
+    <button class="btn" onclick="loadCatalog()">📥 Завантажити каталог (як store.js)</button>
+  </div>
+
+  <div class="test-panel">
+    <h2>📋 Лог</h2>
+    <div class="log" id="logPanel"></div>
+    <button class="btn" onclick="clearLog()">🧹 Очистити лог</button>
+  </div>
+
+  <script>
+    const log = (msg, type = 'info') => {
+      const timestamp = new Date().toLocaleTimeString('uk-UA');
+      const colors = {
+        success: '#00ff00',
+        error: '#ff0000',
+        warning: '#ffaa00',
+        info: '#00aaff'
+      };
+      const panel = document.getElementById('logPanel');
+      const color = colors[type] || '#00ff00';
+      panel.innerHTML += `<span style="color: ${color}">[${timestamp}] ${msg}</span>\n`;
+      panel.scrollTop = panel.scrollHeight;
+    };
+
+    const clearLog = () => {
+      document.getElementById('logPanel').innerHTML = '';
+      log('Лог очищено', 'info');
+    };
+
+    // Проверка localStorage
+    function checkLocalStorage() {
+      log('🔍 Перевіряємо localStorage...', 'info');
+      
+      const keys = ['publishedCatalog', 'catalogTimestamp', 'theme', 'cart', 'fav'];
+      let html = '';
+      let hasOldData = false;
+
+      keys.forEach(key => {
+        const value = localStorage.getItem(key);
+        if (value) {
+          const size = new Blob([value]).size;
+          const sizeKB = (size / 1024).toFixed(2);
+          
+          if (key === 'publishedCatalog') {
+            hasOldData = true;
+            html += `<div class="status warning">⚠️ <strong>${key}</strong>: ${sizeKB} KB (потрібна міграція!)</div>`;
+            log(`⚠️ Знайдено старі дані в localStorage: ${key} (${sizeKB} KB)`, 'warning');
+          } else {
+            html += `<div class="status info">ℹ️ <strong>${key}</strong>: ${sizeKB} KB</div>`;
+            log(`ℹ️ ${key}: ${sizeKB} KB`, 'info');
+          }
+        }
+      });
+
+      if (!hasOldData) {
+        html += '<div class="status success">✅ Старих даних не знайдено - міграція не потрібна</div>';
+        log('✅ localStorage чистий, міграція вже виконана або не потрібна', 'success');
+      }
+
+      document.getElementById('localStorageStatus').innerHTML = html || '<div class="status info">Немає даних</div>';
+    }
+
+    // Проверка IndexedDB
+    async function checkIndexedDB() {
+      log('🔍 Перевіряємо IndexedDB...', 'info');
+      
+      try {
+        const request = indexedDB.open('stroyklimat-admin', 2);
+        
+        request.onerror = () => {
+          const msg = 'База даних недоступна';
+          document.getElementById('indexedDBStatus').innerHTML = `<div class="status error">❌ ${msg}</div>`;
+          log(`❌ ${msg}`, 'error');
+        };
+        
+        request.onsuccess = (event) => {
+          const db = event.target.result;
+          let html = '';
+          
+          log(`✅ Підключено до бази даних (версія ${db.version})`, 'success');
+          html += `<div class="status success">✅ База даних: <strong>${db.name}</strong> (версія ${db.version})</div>`;
+          
+          // Список object stores
+          const stores = Array.from(db.objectStoreNames);
+          html += `<div class="status info">📦 Object Stores: ${stores.join(', ')}</div>`;
+          log(`📦 Object Stores: ${stores.join(', ')}`, 'info');
+          
+          // Проверяем published store
+          if (stores.includes('published')) {
+            const tx = db.transaction('published', 'readonly');
+            const store = tx.objectStore('published');
+            const getRequest = store.get('catalog');
+            
+            getRequest.onsuccess = () => {
+              const result = getRequest.result;
+              if (result && result.data) {
+                const count = result.data.length;
+                const timestamp = new Date(result.timestamp).toLocaleString('uk-UA');
+                html += `<div class="status success">✅ Published каталог: ${count} товарів (оновлено: ${timestamp})</div>`;
+                log(`✅ Published каталог: ${count} товарів`, 'success');
+                log(`📅 Timestamp: ${timestamp}`, 'info');
+              } else {
+                html += `<div class="status warning">⚠️ Published каталог порожній</div>`;
+                log(`⚠️ Published каталог порожній`, 'warning');
+              }
+              document.getElementById('indexedDBStatus').innerHTML = html;
+            };
+          } else {
+            html += `<div class="status error">❌ Object store 'published' не знайдено!</div>`;
+            log(`❌ Object store 'published' не знайдено!`, 'error');
+            document.getElementById('indexedDBStatus').innerHTML = html;
+          }
+          
+          db.close();
+        };
+      } catch (e) {
+        const msg = `Помилка: ${e.message}`;
+        document.getElementById('indexedDBStatus').innerHTML = `<div class="status error">❌ ${msg}</div>`;
+        log(`❌ ${msg}`, 'error');
+      }
+    }
+
+    // Симуляция миграции (как в admin.js)
+    async function simulateMigration() {
+      log('🚀 Запуск міграції...', 'info');
+      
+      try {
+        const legacyData = localStorage.getItem('publishedCatalog');
+        
+        if (!legacyData) {
+          log('ℹ️ Немає даних для міграції в localStorage', 'warning');
+          alert('Немає даних для міграції. Спочатку збережіть каталог в адмін-панелі.');
+          return;
+        }
+
+        log(`📦 Знайдено дані в localStorage (${(legacyData.length / 1024).toFixed(2)} KB)`, 'info');
+        
+        const catalog = JSON.parse(legacyData);
+        log(`📊 Розпарсено ${catalog.length} товарів`, 'info');
+        
+        // Открываем БД
+        const request = indexedDB.open('stroyklimat-admin', 2);
+        
+        request.onsuccess = (event) => {
+          const db = event.target.result;
+          log('✅ Підключено до IndexedDB', 'success');
+          
+          const tx = db.transaction('published', 'readwrite');
+          const store = tx.objectStore('published');
+          const timestamp = Date.now();
+          
+          store.put({ 
+            id: 'catalog', 
+            data: catalog, 
+            timestamp: timestamp 
+          });
+          
+          localStorage.setItem('catalogTimestamp', timestamp.toString());
+          
+          tx.oncomplete = () => {
+            log('✅ Дані збережено в IndexedDB', 'success');
+            log('🗑️ Видаляємо publishedCatalog з localStorage...', 'info');
+            localStorage.removeItem('publishedCatalog');
+            log('✅ Міграція завершена!', 'success');
+            db.close();
+            checkLocalStorage();
+            checkIndexedDB();
+          };
+          
+          tx.onerror = () => {
+            log(`❌ Помилка транзакції: ${tx.error}`, 'error');
+            db.close();
+          };
+        };
+        
+        request.onerror = () => {
+          log(`❌ Помилка відкриття БД: ${request.error}`, 'error');
+        };
+        
+      } catch (e) {
+        log(`❌ Помилка міграції: ${e.message}`, 'error');
+      }
+    }
+
+    // Загрузка каталога (как в store.js)
+    async function loadCatalog() {
+      log('📥 Завантаження каталогу (як store.js)...', 'info');
+      
+      try {
+        // Читаем из IndexedDB
+        const request = indexedDB.open('stroyklimat-admin', 2);
+        
+        request.onsuccess = (event) => {
+          const db = event.target.result;
+          
+          if (!db.objectStoreNames.contains('published')) {
+            log('⚠️ Published store не знайдено, fallback на catalog.json', 'warning');
+            loadFromFile();
+            db.close();
+            return;
+          }
+          
+          const tx = db.transaction('published', 'readonly');
+          const store = tx.objectStore('published');
+          const getRequest = store.get('catalog');
+          
+          getRequest.onsuccess = () => {
+            const result = getRequest.result;
+            if (result && result.data) {
+              log(`✅ Завантажено з IndexedDB: ${result.data.length} товарів`, 'success');
+              const timestamp = new Date(result.timestamp).toLocaleString('uk-UA');
+              log(`📅 Час публікації: ${timestamp}`, 'info');
+            } else {
+              log('⚠️ IndexedDB порожній, fallback на catalog.json', 'warning');
+              loadFromFile();
+            }
+            db.close();
+          };
+          
+          getRequest.onerror = () => {
+            log('❌ Помилка читання з IndexedDB, fallback на catalog.json', 'error');
+            loadFromFile();
+            db.close();
+          };
+        };
+        
+        request.onerror = () => {
+          log('❌ Не вдалось відкрити IndexedDB, fallback на catalog.json', 'error');
+          loadFromFile();
+        };
+        
+      } catch (e) {
+        log(`❌ Помилка: ${e.message}`, 'error');
+      }
+    }
+
+    async function loadFromFile() {
+      try {
+        log('📄 Завантаження з catalog.json...', 'info');
+        const r = await fetch('./site_data/catalog.json', { cache: 'no-store' });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const data = await r.json();
+        log(`✅ Завантажено з файлу: ${data.length} товарів`, 'success');
+      } catch (e) {
+        log(`❌ Помилка завантаження файлу: ${e.message}`, 'error');
+      }
+    }
+
+    function clearLocalStorage() {
+      if (confirm('Видалити ВСІ дані з localStorage?')) {
+        localStorage.clear();
+        log('🗑️ localStorage очищено', 'warning');
+        checkLocalStorage();
+      }
+    }
+
+    async function deleteIndexedDB() {
+      if (confirm('Видалити БД stroyklimat-admin?')) {
+        try {
+          const request = indexedDB.deleteDatabase('stroyklimat-admin');
+          request.onsuccess = () => {
+            log('🗑️ IndexedDB видалено', 'warning');
+            checkIndexedDB();
+          };
+          request.onerror = () => {
+            log(`❌ Помилка видалення БД: ${request.error}`, 'error');
+          };
+        } catch (e) {
+          log(`❌ Помилка: ${e.message}`, 'error');
+        }
+      }
+    }
+
+    // Автоматическая проверка при загрузке
+    window.addEventListener('DOMContentLoaded', () => {
+      log('🚀 Тестова сторінка завантажена', 'info');
+      checkLocalStorage();
+      checkIndexedDB();
+    });
+  </script>
+</body>
+</html>

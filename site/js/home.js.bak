@@ -1,0 +1,272 @@
+function esc(s){ return String(s||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;"); }
+function fmtUAH(n){
+  const v = Number(n||0);
+  if(!v) return "Р¦С–РЅСѓ СѓС‚РѕС‡РЅСЋР№С‚Рµ";
+  return v.toLocaleString("uk-UA")+" в‚ґ";
+}
+function stockLabel(v){ return v==="in_stock" ? "Р’ РЅР°СЏРІРЅРѕСЃС‚С–" : (v==="on_order" ? "РџС–Рґ Р·Р°РјРѕРІР»РµРЅРЅСЏ" : "РќРµРјР°С”"); }
+function primaryImage(images){
+  if(!Array.isArray(images)) return "";
+  const clean = images.filter(Boolean).filter(u => !String(u).includes("2382346564_w350_h100_tov-bis-7"));
+  return clean[0] || "";
+}
+async function j(path){
+  const r = await fetch(path);
+  if(!r.ok) throw new Error("HTTP "+r.status+" "+path);
+  return r.json();
+}
+
+function cardHTML(p){
+  const img = primaryImage(p.images);
+  return `
+  <article class="card">
+    <div class="img ${img? "": "sk"}">
+      ${img ? `<img src="${img}" loading="lazy" alt="${esc(p.title)}">` : ``}
+    </div>
+    <div class="body">
+      <div class="title">${esc(p.title)}</div>
+      <div class="row">
+        <div class="price">${fmtUAH(p.price_uah)}</div>
+        <div class="badge">${stockLabel(p.stock)}</div>
+      </div>
+    </div>
+    <div class="actions">
+      <a class="ghost" href="./product.html?id=${encodeURIComponent(p.id)}">Р”РµС‚Р°Р»СЊРЅС–С€Рµ</a>
+      <button data-add="${esc(p.id)}">Р’ РєРѕС€РёРє</button>
+    </div>
+  </article>`;
+}
+
+function topCats(catalog){
+  const m = new Map();
+  for(const p of catalog){
+    const c = (p.breadcrumbs && p.breadcrumbs[0]) ? p.breadcrumbs[0] : (p.category||"");
+    if(!c) continue;
+    m.set(c, (m.get(c)||0)+1);
+  }
+  return [...m.entries()].sort((a,b)=>b[1]-a[1]).map(([name,count])=>({name,count}));
+}
+
+async function main(){
+  document.getElementById("y").textContent = String(new Date().getFullYear());
+
+  const catalog = await j("./site_data/catalog.json");
+  const idx = await j("./site_data/index.json");
+  const featuredIds = new Set(idx.featured_product_ids || []);
+
+  const cats = topCats(catalog).slice(0, 12);
+  const tiles = document.getElementById("catTiles");
+  tiles.innerHTML = cats.map(c=>`
+    <div class="tile" data-cat="${esc(c.name)}" role="button" tabindex="0">
+      <div>
+        <div class="tname">${esc(c.name)}</div>
+        <div class="tcount">${c.count} РїРѕР·РёС†С–Р№</div>
+      </div>
+      <div class="muted">в†’</div>
+    </div>
+  `).join("");
+
+  tiles.addEventListener("click",(e)=>{
+    const t = e.target.closest("[data-cat]");
+    if(!t) return;
+    const cat = t.getAttribute("data-cat");
+    location.href = `./catalog.html?cat=${encodeURIComponent(cat)}`;
+  });
+
+  const featured = (idx.featured_product_ids || []).map(id=>catalog.find(p=>p.id===id)).filter(Boolean).slice(0, 8);
+  document.getElementById("featured").innerHTML = featured.map(cardHTML).join("");
+
+  const newest = catalog.slice().sort((a,b)=>String(b.id||"").localeCompare(String(a.id||""))).slice(0, 8);
+  document.getElementById("newGrid").innerHTML = newest.map(cardHTML).join("");
+
+  const keys = ["РјРѕРЅС‚Р°Р¶","РїСЂРѕС”РєС‚","РїСЂРѕРµРєС‚","СЃРµСЂРІС–СЃ","РѕР±СЃР»СѓРіРѕРІ","РІРµРЅС‚РёР»СЏС†","РєРѕРЅРґРёС†"];
+  const services = catalog.filter(p=>keys.some(k => (p.title||"").toLowerCase().includes(k))).slice(0, 8);
+  document.getElementById("servicesGrid").innerHTML = services.map(cardHTML).join("");
+
+  const m = document.getElementById("mCount");
+  if(m) m.textContent = (catalog.length||1250) + "+";
+
+  const gridClicks = (e)=>{
+    const btn = e.target.closest("[data-add]");
+    if(!btn) return;
+    const id = btn.getAttribute("data-add");
+    const p = catalog.find(x=>x.id===id);
+    if(!p) return;
+    const cart = JSON.parse(localStorage.getItem("cart")||"[]");
+    const i = cart.findIndex(x=>x.id===id);
+    if(i>=0) cart[i].qty = (cart[i].qty||0)+1;
+    else cart.push({id, qty:1, title:p.title, price_uah:p.price_uah, image: primaryImage(p.images)});
+    localStorage.setItem("cart", JSON.stringify(cart));
+    if(window.mountHeader) window.mountHeader();
+    btn.textContent = "Р”РѕРґР°РЅРѕ вњ“";
+    setTimeout(()=>btn.textContent="Р’ РєРѕС€РёРє", 800);
+  };
+
+  document.getElementById("featured").addEventListener("click", gridClicks);
+  document.getElementById("newGrid").addEventListener("click", gridClicks);
+  document.getElementById("servicesGrid").addEventListener("click", gridClicks);
+}
+
+main().catch(err=>{
+  console.error(err);
+  alert("РџРѕРјРёР»РєР° РЅР° РіРѕР»РѕРІРЅС–Р№: РїРµСЂРµРІС–СЂ С‰Рѕ СЃРµСЂРІРµСЂ Р·Р°РїСѓС‰РµРЅРёР№ Сѓ ~/STROYKLIMAT/site С– С–СЃРЅСѓС” site_data/*.json");
+});async function loadJSON(path){
+  const r = await fetch(path);
+  if(!r.ok) throw new Error("HTTP "+r.status+" for "+path);
+  return await r.json();
+}
+function qs(sel){ return document.querySelector(sel); }
+function qsa(sel){ return Array.from(document.querySelectorAll(sel)); }
+function escapeHtml(s){
+  return String(s||"")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;");
+}
+function fmtUAH(n){
+  const v = Number(n||0);
+  return v.toLocaleString("uk-UA") + " в‚ґ";
+}
+function getPrimaryImage(images){
+  if(!Array.isArray(images)) return "";
+  const clean = images
+    .filter(Boolean)
+    .filter(u => !String(u).includes("2382346564_w350_h100_tov-bis-7")); // СѓР±СЂР°С‚СЊ РєР°СЂС‚РёРЅРєСѓ-Р»РѕРіРѕС‚РёРї
+  return clean[0] || images[0] || "";
+}
+function stockLabel(v){
+  if(v==="in_stock") return "Р’ РЅР°СЏРІРЅРѕСЃС‚С–";
+  if(v==="on_order") return "РџС–Рґ Р·Р°РјРѕРІР»РµРЅРЅСЏ";
+  return "РќРµРјР°С”";
+}
+function readLS(key, def){
+  try{ return JSON.parse(localStorage.getItem(key)||"") ?? def; }catch{ return def; }
+}
+function writeLS(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
+function getCart(){ return readLS("cart", []); }
+function setCart(v){ writeLS("cart", v); }
+function getFav(){ return readLS("fav", []); }
+function setFav(v){ writeLS("fav", v); }
+function cartCount(){ return getCart().reduce((s,x)=>s+(x.qty||0),0); }
+function favCount(){ return getFav().length; }
+function mountHeader(){
+  qsa("[data-cart-count]").forEach(el=>el.textContent=String(cartCount()));
+  qsa("[data-fav-count]").forEach(el=>el.textContent=String(favCount()));
+}
+function addToCart(product, qty){
+  const cart = getCart();
+  const i = cart.findIndex(x=>x.id===product.id);
+  if(i>=0) cart[i].qty = (cart[i].qty||0) + qty;
+  else cart.push({id: product.id, qty, title: product.title, price_uah: product.price_uah, image: getPrimaryImage(product.images)});
+  setCart(cart);
+}
+function toggleFav(id){
+  const fav = getFav();
+  const i = fav.indexOf(id);
+  if(i>=0) fav.splice(i,1); else fav.push(id);
+  setFav(fav);
+  return fav.includes(id);
+}
+function inFav(id){ return getFav().includes(id); }
+
+function topCatsFromBreadcrumbs(items){
+  const m = new Map();
+  items.forEach(p=>{
+    const c = (p.breadcrumbs && p.breadcrumbs[0]) ? p.breadcrumbs[0] : "";
+    if(!c) return;
+    m.set(c,(m.get(c)||0)+1);
+  });
+  return Array.from(m.entries())
+    .sort((a,b)=>b[1]-a[1])
+    .map(([name,count])=>({name,count}));
+}
+function normalizeCategories(raw, catalog){
+  if(Array.isArray(raw) && raw.length){
+    if(typeof raw[0] === "string") return raw.map(s=>({name:s}));
+    if(typeof raw[0] === "object") return raw.map(o=>({name:o.name || o.title || String(o)}));
+  }
+  return topCatsFromBreadcrumbs(catalog);
+}
+
+function cardHTML(p){
+  const img = getPrimaryImage(p.images);
+  const fav = inFav(p.id);
+  const href = "./product.html?id=" + encodeURIComponent(p.id);
+  return `
+  <article class="card prod-card">
+    <a class="img" href="${href}">
+      ${img ? `<img src="${img}" alt="${escapeHtml(p.title)}">` : ``}
+    </a>
+    <div class="body">
+      <div class="title"><a href="${href}">${escapeHtml(p.title)}</a></div>
+      <div class="meta">
+        <div class="price">${fmtUAH(p.price_uah)}</div>
+        <div class="stock">${stockLabel(p.stock)}</div>
+      </div>
+      <div class="row">
+        <button class="btn" data-add="${escapeHtml(p.id)}">Р’ РєРѕС€РёРє</button>
+        <button class="btn ghost" data-fav="${escapeHtml(p.id)}">${fav ? "в™Ґ" : "в™Ў"} РћР±СЂР°РЅРµ</button>
+      </div>
+    </div>
+  </article>`;
+}
+
+async function main(){
+  mountHeader();
+
+  const catalog = await loadJSON("./site_data/catalog.json");
+  let catsRaw = [];
+  try{ catsRaw = await loadJSON("./site_data/categories.json"); }catch{ catsRaw = []; }
+  const categories = normalizeCategories(catsRaw, catalog);
+
+  const index = await loadJSON("./site_data/index.json");
+  const featuredIds = index.featured_product_ids || [];
+  const featured = featuredIds.map(id => catalog.find(p=>p.id===id)).filter(Boolean).slice(0, 12);
+
+  // === categories chips on home ===
+  const catsEl = qs("#categoriesBar");
+  if(catsEl){
+    catsEl.innerHTML = "";
+    const mk = (label, url, active=false)=>{
+      const a = document.createElement("a");
+      a.href = url;
+      a.className = "chip" + (active ? " active" : "");
+      a.textContent = label;
+      return a;
+    };
+    catsEl.appendChild(mk("Р’СЃС–", "./catalog.html", true));
+    categories.slice(0, 24).forEach(c=>{
+      catsEl.appendChild(mk(c.name, "./catalog.html?cat="+encodeURIComponent(c.name)));
+    });
+  }
+
+  // === featured grid ===
+  const grid = qs("#featured");
+  if(grid){
+    grid.innerHTML = featured.map(cardHTML).join("");
+    grid.addEventListener("click",(e)=>{
+      const add = e.target.closest("[data-add]");
+      const fav = e.target.closest("[data-fav]");
+      if(add){
+        const id = add.getAttribute("data-add");
+        const p = catalog.find(x=>x.id===id);
+        if(!p) return;
+        addToCart(p, 1);
+        mountHeader();
+        add.textContent = "Р”РѕРґР°РЅРѕ вњ“";
+        setTimeout(()=>add.textContent="Р’ РєРѕС€РёРє", 800);
+      }
+      if(fav){
+        const id = fav.getAttribute("data-fav");
+        const on = toggleFav(id);
+        fav.textContent = (on ? "в™Ґ" : "в™Ў") + " РћР±СЂР°РЅРµ";
+        mountHeader();
+      }
+    });
+  }
+}
+main().catch(err=>{
+  console.error(err);
+  alert("РџРѕРјРёР»РєР° РЅР° РіРѕР»РѕРІРЅС–Р№. РџРµСЂРµРІС–СЂ, С‰Рѕ СЃРµСЂРІРµСЂ Р·Р°РїСѓС‰РµРЅРёР№ Сѓ ~/STROYKLIMAT/site С– С” РїР°РїРєР° site_data Р· JSON.");
+});

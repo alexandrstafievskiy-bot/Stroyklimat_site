@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Кошик — STROYKLIMAT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./assets/styles.css"/>
+</head>
+<body>
+  <header class="topbar">
+    <div class="container">
+      <div class="topbar-inner">
+        <a class="brand" href="./index.html">
+          <div class="logo"><img src="./assets/logo.svg" alt="logo"/></div>
+          <div class="name"><strong>STROYKLIMAT</strong><span>ТОВ "Бис 7"</span></div>
+        </a>
+        <form class="search" data-search-form>
+          <input data-search-input placeholder="Пошук товарів…"/>
+          <button type="submit">Пошук</button>
+        </form>
+        <nav class="actions">
+          <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme" title="Переключить тему">🌙</button>
+          <a class="pill" href="./favorites.html">Обране <b data-fav-count>0</b></a>
+          <a class="pill" href="./cart.html">Кошик <b data-cart-count>0</b></a>
+        </nav>
+      </div>
+      <div class="navline">
+        <div class="nav">
+          <a class="chip" href="./catalog.html">Каталог</a>
+          <a class="chip" href="./about.html">Про нас</a>
+          <a class="chip" href="./delivery.html">Доставка і оплата</a>
+          <a class="chip" href="./testimonials.html">⭐ Відгуки</a>
+          <a class="chip" href="./returns.html">Повернення</a>
+          <a class="chip" href="./contacts.html">Контакти</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="container">
+      <div class="panel"><div class="panel-inner" id="cart"></div></div>
+    </div>
+  </main>
+
+  <footer class="footer"><div class="container">© STROYKLIMAT (ТОВ "Бис 7")</div></footer>
+
+  <script src="./js/store.js"></script>
+  <script src="./js/app.js"></script>
+  <script src="./js/showcase.js"></script>
+  <script>
+    // Using store.js functions from global scope
+    mountHeader();
+    setSearchValueFromURL();
+
+    let catalog = [];
+    
+    function render(){
+      const cart = getCart();
+      const mode = localStorage.getItem('storeMode') || 'shop';
+      const isShowcase = mode === 'showcase';
+      const pageTitle = isShowcase ? 'Запити ціни' : 'Кошик';
+      
+      if(cart.length === 0){
+        document.getElementById("cart").innerHTML = `
+          <h2 style="margin:0 0 8px 0">${pageTitle}</h2>
+          <div class="muted">Поки що ${isShowcase ? 'немає запитів' : 'порожньо'}.</div>
+          <div style="margin-top:12px"><a class="btn primary" href="./catalog.html">Перейти в каталог</a></div>
+        `;
+        return;
+      }
+
+      let total = 0;
+      const rows = cart.map(item=>{
+        const p = catalog.find(x => x.id === item.id);
+        const qty = item.qty || 1;
+        const price = (p?.price_uah || 0);
+        total += price * qty;
+        
+        const img = p?.images?.[0] || '';
+        const priceText = p ? formatUAH(p.price_uah) : "—";
+        const itemTotal = formatUAH(price * qty);
+        
+        return `
+          <div class="cart-item" style="border-radius:16px;padding:14px;background:linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.1);margin-bottom:12px;display:flex;gap:14px;align-items:center;transition:all .3s ease;animation:fadeInScale .5s ease-out backwards;animation-delay:${Math.min(cart.indexOf(item) * 0.1, 0.5)}s;">
+            ${img ? `<img src="${img}" alt="${p.title}" style="width:80px;height:80px;object-fit:cover;border-radius:12px;background:rgba(0,0,0,.2);">` : '<div style="width:80px;height:80px;border-radius:12px;background:rgba(0,0,0,.2);"></div>'}
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:700;font-size:15px;margin-bottom:4px;">${p ? p.title : item.id}</div>
+              <div class="muted" style="font-size:13px;">${priceText} × ${qty} = ${itemTotal}</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-shrink:0;">
+              <button class="iconbtn" data-minus="${item.id}" style="padding:8px 12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:8px;cursor:pointer;transition:all .2s ease;">−</button>
+              <div style="min-width:32px;text-align:center;font-weight:700;">${qty}</div>
+              <button class="iconbtn" data-plus="${item.id}" style="padding:8px 12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:8px;cursor:pointer;transition:all .2s ease;">+</button>
+              <button class="iconbtn" data-del="${item.id}" style="padding:8px 12px;background:rgba(255,100,100,.15);border:1px solid rgba(255,100,100,.3);border-radius:8px;cursor:pointer;transition:all .2s ease;margin-left:4px;">✕</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById("cart").innerHTML = `
+        <h2 style="margin:0 0 16px 0">${pageTitle} (${cart.length} ${cart.length === 1 ? 'товар' : 'товари'})</h2>
+        ${rows}
+        <div style="margin-top:20px;padding:18px;border-radius:16px;background:linear-gradient(135deg, rgba(74,163,255,.15), rgba(74,163,255,.08));border:1px solid rgba(74,163,255,.3);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+          <div>
+            <div class="muted" style="font-size:13px;margin-bottom:4px;">${isShowcase ? 'Запити до розробки:' : 'Загальна сума:'}</div>
+            <div class="bigprice" style="font-size:28px;font-weight:800;background:linear-gradient(135deg, rgba(74,163,255,.9), rgba(74,163,255,.6));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">${isShowcase ? cart.length + ' запитів' : formatUAH(total)}</div>
+          </div>
+          ${isShowcase 
+            ? `<a class="btn primary" href="https://t.me/stroyklimat" target="_blank" style="padding:12px 18px;font-size:15px;">✈️ Написати на Telegram</a>` 
+            : `<a class="btn primary" href="tel:+380509735955" style="padding:12px 18px;font-size:15px;">📞 Оформити по телефону</a>`
+          }
+        </div>
+      `;
+    }
+
+    // ensure catalog is loaded so we can show product details
+    (async function(){
+      // Load catalog
+      try {
+        const response = await fetch('./site_data/catalog.json');
+        catalog = await response.json();
+      } catch(err) {
+        console.error('Failed to load catalog:', err);
+      }
+      
+      render();
+
+      document.getElementById("cart").addEventListener("click", (e)=>{
+      const cart = getCart();
+      const minus = e.target.closest("[data-minus]");
+      const plus = e.target.closest("[data-plus]");
+      const del = e.target.closest("[data-del]");
+
+      if(minus){
+        const id = minus.getAttribute("data-minus");
+        const it = cart.find(x=>x.id===id);
+        if(it){ it.qty = Math.max(1, (it.qty||1)-1); }
+        setCart(cart); render(); mountHeader();
+      }
+      if(plus){
+        const id = plus.getAttribute("data-plus");
+        const it = cart.find(x=>x.id===id);
+        if(it){ it.qty = (it.qty||1)+1; }
+        setCart(cart); render(); mountHeader();
+      }
+      if(del){
+        const id = del.getAttribute("data-del");
+        const next = cart.filter(x=>x.id!==id);
+        setCart(next); render(); mountHeader();
+      }
+      });
+    })();
+  </script>
+</body>
+</html>

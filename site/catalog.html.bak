@@ -1,0 +1,174 @@
+<head>
+  <meta charset="utf-8">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  ...
+</head>
+<main class="container catalog-layout">
+  <aside class="sidebar">
+    <div class="side-card">
+      <div class="side-title">РљР°С‚РµРіРѕСЂС–С—</div>
+      <input id="catSearch" class="side-input" placeholder="РџРѕС€СѓРє РєР°С‚РµРіРѕСЂС–С—вЂ¦"/>
+      <div id="catList" class="side-list sk"></div>
+    </div>
+
+    <div class="side-card">
+      <div class="side-title">Р¤С–Р»СЊС‚СЂРё</div>
+
+      <label class="side-row">
+        <input type="checkbox" id="onlyInStock"/>
+        <span>РўС–Р»СЊРєРё вЂњР’ РЅР°СЏРІРЅРѕСЃС‚С–вЂќ</span>
+      </label>
+
+      <div class="side-grid">
+        <div>
+          <div class="side-label">Р¦С–РЅР° РІС–Рґ</div>
+          <input id="minPrice" class="side-input" inputmode="numeric" placeholder="0"/>
+        </div>
+        <div>
+          <div class="side-label">Р¦С–РЅР° РґРѕ</div>
+          <input id="maxPrice" class="side-input" inputmode="numeric" placeholder="в€ћ"/>
+        </div>
+      </div>
+
+      <label class="side-row">
+        <input type="checkbox" id="hideZero"/>
+        <span>РџСЂРёС…РѕРІР°С‚Рё вЂњР¦С–РЅСѓ СѓС‚РѕС‡РЅСЋР№С‚РµвЂќ</span>
+      </label>
+
+      <button id="resetBtn" class="btn w100">РЎРєРёРЅСѓС‚Рё С„С–Р»СЊС‚СЂРё</button>
+    </div>
+  </aside>
+
+  <section class="catalog-main">
+    <div class="catalog-header">
+      <div class="left">
+        <h1>РљР°С‚Р°Р»РѕРі</h1>
+        <div class="muted" id="activeInfo"></div>
+      </div>
+
+      <div class="right controls">
+        <label class="ctrl">
+          <span>РЎРѕСЂС‚СѓРІР°РЅРЅСЏ</span>
+          <select id="sortSelect">
+            <option value="recommended">Р РµРєРѕРјРµРЅРґРѕРІР°РЅС–</option>
+            <option value="price_asc">Р¦С–РЅР°: Р·СЂРѕСЃС‚Р°РЅРЅСЏ</option>
+            <option value="price_desc">Р¦С–РЅР°: СЃРїР°РґР°РЅРЅСЏ</option>
+            <option value="newest">РќРѕРІС–С€С–</option>
+          </select>
+        </label>
+
+        <label class="ctrl">
+          <span>РўРѕРІР°СЂС–РІ РЅР° СЃС‚РѕСЂС–РЅС†С–</span>
+          <select id="pageSizeSelect">
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <section class="grid-wrap">
+      <div id="grid" class="grid"></div>
+    </section>
+
+    <div class="pager">
+      <button id="prevBtn" class="btn">в†ђ РќР°Р·Р°Рґ</button>
+      <div id="pageInfo" class="muted">РЎС‚РѕСЂС–РЅРєР° 1</div>
+      <button id="nextBtn" class="btn">Р”Р°Р»С– в†’</button>
+    </div>
+  </section>
+</main><!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>РљР°С‚Р°Р»РѕРі вЂ” STROYKLIMAT</title>
+<link rel="stylesheet" href="./assets/styles.css"/>
+</head>
+
+<body>
+
+<header class="topbar">
+<div class="container">
+<div class="topbar-inner">
+
+<a class="brand" href="./index.html">
+<div class="logo"><img src="./assets/logo.svg"/></div>
+<div class="name">
+<strong>STROYKLIMAT</strong>
+<span>РўРћР’ "Р‘РёСЃ 7"</span>
+</div>
+</a>
+
+<form class="search" id="searchForm">
+<input id="searchInput" placeholder="РџРѕС€СѓРє С‚РѕРІР°СЂС–РІвЂ¦"/>
+<button>РџРѕС€СѓРє</button>
+</form>
+
+<nav class="actions">
+<a class="pill" href="./favorites.html">РћР±СЂР°РЅРµ <b data-fav-count>0</b></a>
+<a class="pill" href="./cart.html">РљРѕС€РёРє <b data-cart-count>0</b></a>
+</nav>
+
+</div>
+
+<div class="navline">
+<a href="./catalog.html" class="navlink active">РљР°С‚Р°Р»РѕРі</a>
+<a href="./about.html" class="navlink">РџСЂРѕ РЅР°СЃ</a>
+<a href="./delivery.html" class="navlink">Р”РѕСЃС‚Р°РІРєР°</a>
+<a href="./returns.html" class="navlink">РџРѕРІРµСЂРЅРµРЅРЅСЏ</a>
+<a href="./contacts.html" class="navlink">РљРѕРЅС‚Р°РєС‚Рё</a>
+</div>
+
+</div>
+</header>
+
+<main class="container">
+
+<h1>РљР°С‚Р°Р»РѕРі</h1>
+
+<div class="controls">
+
+<label>
+РЎРѕСЂС‚СѓРІР°РЅРЅСЏ
+<select id="sortSelect">
+<option value="recommended">Р РµРєРѕРјРµРЅРґРѕРІР°РЅС–</option>
+<option value="price_asc">Р¦С–РЅР° в†‘</option>
+<option value="price_desc">Р¦С–РЅР° в†“</option>
+</select>
+</label>
+
+<label>
+РўРѕРІР°СЂС–РІ
+<select id="pageSizeSelect">
+<option>25</option>
+<option>50</option>
+<option>100</option>
+</select>
+</label>
+
+</div>
+
+<section class="cats">
+<div id="categoriesBar" class="chips"></div>
+</section>
+
+<section class="grid-wrap">
+<div id="grid" class="grid"></div>
+</section>
+
+<div class="pager">
+<button id="prevBtn">в†ђ РќР°Р·Р°Рґ</button>
+<div id="pageInfo">РЎС‚РѕСЂС–РЅРєР° 1</div>
+<button id="nextBtn">Р”Р°Р»С– в†’</button>
+</div>
+
+</main>
+
+<script src="./js/store.js"></script>
+<script src="./js/catalog.js"></script>
+
+</body>
+</html>

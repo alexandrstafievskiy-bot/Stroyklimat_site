@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="uk" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ Панель - STROYKLIMAT Каталог</title>
+    <link rel="stylesheet" href="./assets/styles.css">
+    <style>
+        .admin-wrapper {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 0;
+            min-height: 100vh;
+        }
+        .admin-sidebar {
+            background: var(--card);
+            border-right: 1px solid var(--stroke);
+            padding: 20px 0;
+            overflow-y: auto;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
+        .admin-navbar {
+            background: var(--card);
+            border-bottom: 1px solid var(--stroke);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .admin-content {
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .nav-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+            color: var(--muted);
+            transition: all 0.2s ease;
+            display: block;
+            text-align: left;
+            width: 100%;
+        }
+        .nav-item:hover, .nav-item.active {
+            border-left-color: var(--brand);
+            color: var(--brand);
+            background: rgba(47,125,225,.1);
+        }
+        .section-title {
+            padding: 10px 20px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .admin-panel {
+            display: none;
+        }
+        .admin-panel.active {
+            display: block;
+        }
+        .table-wrapper {
+            background: var(--card);
+            border: 1px solid var(--stroke);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .table-header {
+            display: grid;
+            grid-template-columns: 50px 150px 100px 100px 80px 0.5fr 80px;
+            gap: 0;
+            background: var(--bg0);
+            border-bottom: 1px solid var(--stroke);
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--brand);
+        }
+        .table-row {
+            display: grid;
+            grid-template-columns: 50px 150px 100px 100px 80px 0.5fr 80px;
+            gap: 0;
+            border-bottom: 1px solid var(--stroke);
+            align-items: center;
+            padding: 0;
+        }
+        .table-row:hover {
+            background: rgba(47,125,225,.05);
+        }
+        .cell {
+            padding: 12px 15px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--text);
+            font-size: 14px;
+        }
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--bg0);
+            border: 1px solid var(--stroke);
+            color: var(--text);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: monospace;
+        }
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--brand);
+            box-shadow: 0 0 0 3px rgba(47,125,225,.1);
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .btn {
+            padding: 10px 16px;
+            border: 1px solid var(--stroke);
+            background: var(--card);
+            color: var(--text);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .btn:hover {
+            background: rgba(47,125,225,.1);
+            border-color: var(--brand);
+        }
+        .btn.primary {
+            background: var(--brand);
+            color: white;
+            border-color: var(--brand);
+        }
+        .btn.primary:hover {
+            background: var(--brand2);
+            border-color: var(--brand2);
+        }
+        .btn.danger {
+            color: #d32f2f;
+        }
+        .btn.danger:hover {
+            background: rgba(211,47,47,.1);
+            border-color: #d32f2f;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: var(--card);
+            border: 1px solid var(--stroke);
+            border-radius: 12px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text);
+        }
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .search-box input {
+            flex: 1;
+            padding: 10px 12px;
+            background: var(--bg0);
+            border: 1px solid var(--stroke);
+            color: var(--text);
+            border-radius: 6px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--stroke);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--brand);
+        }
+        .stat-label {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 5px;
+        }
+        .alert {
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        .alert.success {
+            background: rgba(76,175,80,.2);
+            border: 1px solid rgba(76,175,80,.3);
+            color: #4CAF50;
+        }
+        .alert.error {
+            background: rgba(244,67,54,.2);
+            border: 1px solid rgba(244,67,54,.3);
+            color: #f44336;
+        }
+        .alert.warning {
+            background: rgba(255,193,7,.2);
+            border: 1px solid rgba(255,193,7,.3);
+            color: #ff9800;
+        }
+        .checkbox {
+            margin-right: 8px;
+        }
+        .key-value-list {
+            list-style: none;
+            padding: 0;
+        }
+        .key-value-pair {
+            display: grid;
+            grid-template-columns: 1fr 1fr 40px;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: end;
+        }
+        .key-value-pair input {
+            padding: 8px 10px;
+            background: var(--bg0);
+            border: 1px solid var(--stroke);
+            color: var(--text);
+            border-radius: 4px;
+        }
+        .login-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .login-card {
+            background: var(--card);
+            border: 1px solid var(--stroke);
+            padding: 40px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .login-card h1 {
+            margin: 0 0 30px;
+            color: var(--text);
+        }
+        .login-card input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            background: var(--bg0);
+            border: 1px solid var(--stroke);
+            color: var(--text);
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        .upload-area {
+            border: 2px dashed var(--stroke);
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .upload-area:hover {
+            border-color: var(--brand);
+            background: rgba(47,125,225,.05);
+        }
+        .pagination {
+            display: flex;
+            gap: 5px;
+            margin-top: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .page-btn {
+            padding: 6px 12px;
+            border: 1px solid var(--stroke);
+            background: var(--card);
+            color: var(--text);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .page-btn.active {
+            background: var(--brand);
+            color: white;
+            border-color: var(--brand);
+        }
+        
+        /* Mobile Menu */
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--brand);
+            color: white;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,.3);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+        }
+        .mobile-sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,.5);
+            z-index: 1000;
+        }
+        .mobile-sidebar-overlay.active {
+            display: block;
+        }
+        
+        /* Product Cards for Mobile */
+        .product-cards {
+            display: none;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        .product-card {
+            background: var(--card);
+            border: 1px solid var(--stroke);
+            border-radius: 8px;
+            padding: 15px;
+        }
+        .product-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+        .product-card-title {
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--text);
+            flex: 1;
+        }
+        .product-card-body {
+            display: grid;
+            gap: 8px;
+            font-size: 13px;
+        }
+        .product-card-row {
+            display: grid;
+            grid-template-columns: 90px 1fr;
+            gap: 10px;
+        }
+        .product-card-label {
+            color: var(--muted);
+            font-weight: 600;
+        }
+        .product-card-value {
+            color: var(--text);
+        }
+        
+        @media (max-width: 920px) {
+            .admin-wrapper {
+                grid-template-columns: 1fr;
+            }
+            .admin-sidebar {
+                position: fixed;
+                left: -280px;
+                top: 0;
+                bottom: 0;
+                z-index: 1001;
+                transition: left 0.3s ease;
+                width: 260px;
+            }
+            .admin-sidebar.active {
+                left: 0;
+            }
+            .mobile-menu-btn {
+                display: flex;
+            }
+            .table-wrapper {
+                display: none;
+            }
+            .product-cards {
+                display: grid;
+            }
+            .search-box {
+                flex-direction: column;
+            }
+            .search-box input,
+            .search-box select,
+            .search-box button {
+                width: 100%;
+            }
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+                max-height: 85vh;
+            }
+            .modal-title {
+                font-size: 18px;
+            }
+            .login-card {
+                padding: 30px 20px;
+                max-width: 90%;
+            }
+            .btn-group {
+                flex-direction: column;
+            }
+            .btn-group .btn {
+                width: 100%;
+            }
+            .admin-navbar {
+                padding: 12px 15px;
+            }
+            .admin-navbar h2 {
+                font-size: 16px;
+            }
+            .admin-content {
+                padding: 15px;
+            }
+            .form-input, .form-textarea, .form-select {
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 10px;
+            }
+            .stat-card {
+                padding: 15px;
+            }
+            .stat-value {
+                font-size: 22px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .product-card {
+                padding: 12px;
+            }
+            .product-card-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .product-card-title {
+                font-size: 14px;
+            }
+            .btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+            .modal-content {
+                padding: 15px;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div id="loginModal" class="login-modal">
+    <div class="login-card">
+        <h1>🔐 Адмін Панель</h1>
+        <p style="color: var(--muted); margin-bottom: 20px;">Введи PIN для доступу</p>
+        <input type="password" id="adminPin" placeholder="PIN">
+        <button class="btn primary" onclick="Admin.login()" style="width: 100%; cursor: pointer;">Увійти</button>
+    </div>
+</div>
+
+<div class="admin-wrapper" style="display: none;">
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-btn" onclick="Admin.toggleMobileMenu()">☰</button>
+    
+    <!-- Mobile Sidebar Overlay -->
+    <div class="mobile-sidebar-overlay" onclick="Admin.toggleMobileMenu()"></div>
+    
+    <!-- Sidebar -->
+    <div class="admin-sidebar" id="adminSidebar">
+        <div style="padding: 0 15px; margin-bottom: 20px; border-bottom: 1px solid var(--stroke); padding-bottom: 15px;">
+            <div>🛠 АДМИН</div>
+            <small style="color: var(--muted);">STROYKLIMAT</small>
+        </div>
+        <div class="section-title">Меню</div>
+        <div class="nav-item active" onclick="Admin.showPanel('products')">📦 Товари</div>
+        <div class="nav-item" onclick="Admin.showPanel('categories')">🏷️ Категорії</div>
+        <div class="nav-item" onclick="Admin.showPanel('import')">📥 Імпорт/Експорт</div>
+        <div class="nav-item" onclick="Admin.showPanel('versions')">⏮️ Версії</div>
+        <div class="nav-item" onclick="Admin.showPanel('stats')">📊 Статистика</div>
+        <div class="nav-item" onclick="Admin.showPanel('settings')">⚙️ Налаштування</div>
+        <div style="margin-top: 20px; padding: 0 20px;">
+            <button class="btn" onclick="Admin.logout()" style="width: 100%;">Вихід</button>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <div style="grid-column: 2;">
+        <div class="admin-navbar">
+            <h2>Каталог STROYKLIMAT</h2>
+            <div>
+                <button id="themeToggle" class="theme-toggle">🌙</button>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="admin-content">
+            <!-- Products Panel -->
+            <div id="productPanel" class="admin-panel active">
+                <h2>📦 Каталог Товарів</h2>
+                <div class="search-box">
+                    <input type="text" id="searchFilter" placeholder="Пошук..." onkeyup="Admin.filterProducts()">
+                    <select id="categoryFilter" onchange="Admin.filterProducts()" style="width: auto; padding: 10px 12px; background: var(--bg0); border: 1px solid var(--stroke); color: var(--text); border-radius: 6px;">
+                        <option value="">Всі категорії</option>
+                    </select>
+                    <button class="btn primary" onclick="Admin.newProduct()">+ Новий Товар</button>
+                </div>
+                <div id="alertBox"></div>
+                <div class="table-wrapper">
+                    <div class="table-header">
+                        <div class="cell">ID</div>
+                        <div class="cell">Назва</div>
+                        <div class="cell">Категорія</div>
+                        <div class="cell">Ціна</div>
+                        <div class="cell">Наявність</div>
+                        <div class="cell">Опис</div>
+                        <div class="cell">Дії</div>
+                    </div>
+                    <div id="productsTable"></div>
+                </div>
+                <!-- Mobile Product Cards -->
+                <div class="product-cards" id="productCards"></div>
+                <div class="pagination" id="pagination"></div>
+            </div>
+
+            <!-- Product Edit Modal -->
+            <div id="productModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-title" id="modalTitle">Новий Товар</div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Назва *</label>
+                        <input id="editTitle" class="form-input" type="text" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Категорія *</label>
+                        <select id="editCategory" class="form-select" required></select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Ціна (UAH) *</label>
+                        <input id="editPrice" class="form-input" type="number" min="0" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Артикул (SKU)</label>
+                        <input id="editSku" class="form-input" type="text">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Бренд</label>
+                        <input id="editBrand" class="form-input" type="text">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Наявність</label>
+                        <select id="editStock" class="form-select">
+                            <option value="in_stock">В наявності</option>
+                            <option value="limited">Обмежено</option>
+                            <option value="out_of_stock">Немає в наявності</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Основна картинка (URL)</label>
+                        <input id="editImage" class="form-input" type="url">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Опис</label>
+                        <textarea id="editDescription" class="form-textarea"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" id="editFeatured" class="checkbox"> Рекомендуємий
+                        </label>
+                    </div>
+
+                    <div class="btn-group">
+                        <button class="btn primary" onclick="Admin.saveProduct()">Зберегти</button>
+                        <button class="btn" onclick="Admin.closeModal()">Скасувати</button>
+                        <button class="btn danger" onclick="Admin.deleteProduct()" id="deleteBtn" style="display:none;">Видалити</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories Panel -->
+            <div id="categoriesPanel" class="admin-panel">
+                <h2>🏷️ Категорії</h2>
+                <div id="categoriesList" style="display: grid; gap: 10px;"></div>
+            </div>
+
+            <!-- Import/Export Panel -->
+            <div id="importPanel" class="admin-panel">
+                <h2>📥 Імпорт / 📤 Експорт</h2>
+                
+                <h3>Експорт каталогу</h3>
+                <button class="btn primary" onclick="Admin.exportCatalog()">📥 Скачати JSON</button>
+                
+                <h3 style="margin-top: 30px;">Імпорт каталогу</h3>
+                <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                    <p>📤 Перетягни JSON файл сюди або натисни для вибору</p>
+                    <input type="file" id="fileInput" accept=".json" style="display: none;" onchange="Admin.importFile(event)">
+                </div>
+                <div id="importStatus" style="margin-top: 15px;"></div>
+            </div>
+
+            <!-- Versions Panel -->
+            <div id="versionsPanel" class="admin-panel">
+                <h2>⏮️ Історія Версій</h2>
+                <div id="versionsList"></div>
+            </div>
+
+            <!-- Statistics Panel -->
+            <div id="statsPanel" class="admin-panel">
+                <h2>📊 Статистика</h2>
+                <div class="stats-grid" id="statsGrid"></div>
+                <h3>Товари без інформації</h3>
+                <div id="statsDetails"></div>
+            </div>
+
+            <!-- Settings Panel -->
+            <div id="settingsPanel" class="admin-panel">
+                <h2>⚙️ Налаштування</h2>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <input type="radio" name="storeMode" value="shop" checked> 🛍️ Магазин (куплю)
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        <input type="radio" name="storeMode" value="showcase"> 📋 Витрина (запрошу ціну)
+                    </label>
+                </div>
+
+                <button class="btn primary" onclick="Admin.saveSettings()" style="margin-top: 20px;">Зберегти</button>
+                <button class="btn" onclick="Admin.publishCatalog()" style="margin-top: 10px;">📤 Опублікувати каталог</button>
+                <button class="btn danger" onclick="Admin.resetCatalog()" style="margin-top: 10px;">🔄 Скинути на оригінал</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="./js/admin.js"></script>
+<script src="./js/app.js"></script>
+</body>
+</html>

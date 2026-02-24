@@ -1,0 +1,3 @@
+# Заборонити доступ до БД та логів
+Order deny,allow
+Deny from all

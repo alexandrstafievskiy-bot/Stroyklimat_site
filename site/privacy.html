@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Політика конфіденційності — STROYKLIMAT</title>
+  <link rel="stylesheet" href="./assets/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="container">
+      <div class="topbar-inner">
+        <a class="brand" href="./index.html">
+          <div class="logo"><img src="./assets/logo.svg" alt="logo"/></div>
+          <div class="name"><strong>STROYKLIMAT</strong><span>ТОВ "Бис 7"</span></div>
+        </a>
+
+        <form class="search" id="searchForm">
+          <input id="searchInput" placeholder="Пошук товарів… (назва, модель, ключові слова)"/>
+          <button type="submit">Пошук</button>
+        </form>
+
+        <nav class="actions">
+          <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme" title="Переключить тему">🌙</button>
+          <a class="pill" href="./favorites.html">Обране <b data-fav-count>0</b></a>
+          <a class="pill" href="./cart.html">Кошик <b data-cart-count>0</b></a>
+        </nav>
+      </div>
+
+      <div class="navline">
+        <div class="nav">
+          <a class="chip" href="./catalog.html">Каталог</a>
+          <a class="chip" href="./about.html">Про нас</a>
+          <a class="chip" href="./delivery.html">Доставка і оплата</a>
+          <a class="chip" href="./testimonials.html">⭐ Відгуки</a>
+          <a class="chip" href="./returns.html">Повернення</a>
+          <a class="chip" href="./contacts.html">Контакти</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="padding:24px 0">
+    <h1>Політика конфіденційності</h1>
+    <div class="muted" style="margin:8px 0 18px">Оновлено відповідно до тексту на stroyklimat.net</div>
+
+    <div class="card" style="padding:18px">
+      <p>Ця Політика конфіденційності описує, як сайт StroyKlimat.net (далі — «Ми», «Наш сайт») збирає, використовує та захищає персональні дані користувачів («Ви», «Користувач»).</p>
+
+      <h3>1. Збір і використання персональних даних</h3>
+      <p>При використанні нашого сайту ми можемо збирати: ім’я, прізвище, номер телефону, e-mail, адресу доставки; технічні дані (IP, тип браузера, cookie). Платіжні дані не зберігаються — транзакції обробляються через платіжні системи.</p>
+
+      <h3>2. Використання зібраної інформації</h3>
+      <p>Дані використовуються для обробки й доставки замовлень, зв’язку щодо замовлення, покращення сервісу, маркетингових повідомлень (за згодою), аналітики (Google Analytics) та реклами (Google Ads).</p>
+
+      <h3>3. Захист персональних даних</h3>
+      <p>Ми застосовуємо заходи захисту, але жоден метод передачі даних в Інтернеті не гарантує абсолютну безпеку.</p>
+
+      <h3>4. Передача даних третім сторонам</h3>
+      <p>Ми не продаємо дані. Передача можлива лише сервісам доставки, платіжним системам, за вимогою законодавства, сервісам аналітики та рекламним платформам.</p>
+
+      <h3>5. Cookie</h3>
+      <p>Cookie допомагають аналізувати трафік, показувати релевантну рекламу та покращувати UX. Налаштування cookie можна змінити у браузері.</p>
+
+      <h3>6. Ваші права</h3>
+      <p>Доступ до даних, виправлення/видалення, відкликання згоди, скарга до органів захисту даних.</p>
+
+      <h3>7. Зміни</h3>
+      <p>Ми можемо оновлювати цю політику. Зміни чинні з моменту публікації.</p>
+
+      <h3>8. Контакти</h3>
+      <p>Питання: <a href="mailto:denis_bis@ukr.net">denis_bis@ukr.net</a></p>
+    </div>
+  </main>
+
+  <script src="./js/store.js"></script>
+  <script src="./js/app.js"></script>
+  <script>
+    if (window.App) { App.mountHeader(); App.bindGlobalSearch(); }
+  </script>
+</body>
+</html>

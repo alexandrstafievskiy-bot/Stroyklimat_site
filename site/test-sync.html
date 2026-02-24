@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="uk" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Admin Sync - STROYKLIMAT</title>
+  <link rel="stylesheet" href="./assets/styles.css">
+  <style>
+    .test-panel {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 30px;
+      background: var(--card);
+      border: 1px solid var(--stroke);
+      border-radius: 18px;
+    }
+    .test-log {
+      background: rgba(0,0,0,.3);
+      border: 1px solid var(--stroke);
+      border-radius: 12px;
+      padding: 15px;
+      margin-top: 20px;
+      max-height: 400px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+    }
+    .log-entry {
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(255,255,255,.05);
+    }
+    .log-entry.success { color: #4ade80; }
+    .log-entry.info { color: #60a5fa; }
+    .log-entry.warning { color: #fbbf24; }
+    .log-entry.error { color: #ef4444; }
+    .product-count {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--brand);
+      margin: 20px 0;
+    }
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="test-panel">
+      <h1 style="margin: 0 0 10px;">🔄 Admin Sync Test</h1>
+      <p style="color: var(--muted); margin: 0 0 20px;">Тестирование синхронизации между админ панелью и сайтом</p>
+
+      <div style="background: rgba(47,125,225,.1); border: 1px solid rgba(47,125,225,.3); border-radius: 12px; padding: 15px; margin-bottom: 20px;">
+        <div style="font-size: 14px; color: var(--muted); margin-bottom: 5px;">Товаров в каталоге:</div>
+        <div class="product-count" id="productCount">—</div>
+        <div style="font-size: 13px; color: var(--muted);" id="lastUpdate">Загрузка...</div>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn primary" onclick="reloadCatalog()">🔄 Перезагрузить каталог</button>
+        <button class="btn" onclick="clearCache()">🗑️ Очистить кеш</button>
+        <button class="btn" onclick="clearLog()">📝 Очистить лог</button>
+        <a class="btn" href="admin.html" target="_blank">⚙️ Открыть админ панель</a>
+        <a class="btn" href="catalog.html" target="_blank">📦 Открыть каталог</a>
+      </div>
+
+      <div class="test-log" id="testLog">
+        <div class="log-entry info">Инициализация...</div>
+      </div>
+
+      <div style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,.03); border-radius: 12px;">
+        <h3 style="margin: 0 0 10px; font-size: 14px;">📋 Инструкция:</h3>
+        <ol style="margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.6; color: var(--muted);">
+          <li>Откройте админ панель (кнопка выше)</li>
+          <li>Измените цену любого товара или удалите товар</li>
+          <li>Сохраните изменения</li>
+          <li>Вернитесь на эту страницу и посмотрите лог</li>
+          <li>Счетчик товаров должен обновиться автоматически!</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <script src="./js/store.js"></script>
+  <script>
+    let catalog = [];
+    
+    function log(message, type = 'info') {
+      const logEl = document.getElementById('testLog');
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      const time = new Date().toLocaleTimeString('uk-UA');
+      entry.textContent = `[${time}] ${message}`;
+      logEl.appendChild(entry);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function clearLog() {
+      document.getElementById('testLog').innerHTML = '<div class="log-entry info">Лог очищен</div>';
+    }
+
+    async function reloadCatalog() {
+      try {
+        log('🔄 Начало перезагрузки каталога...', 'info');
+        if (window.Store?.clearCatalogCache) {
+          window.Store.clearCatalogCache();
+          log('✓ Кеш очищен', 'success');
+        }
+        catalog = await window.Store.loadCatalog();
+        updateUI();
+        log(`✓ Каталог загружен: ${catalog.length} товаров`, 'success');
+      } catch (err) {
+        log(`✗ Ошибка: ${err.message}`, 'error');
+        console.error(err);
+      }
+    }
+
+    function clearCache() {
+      if (window.Store?.clearCatalogCache) {
+        window.Store.clearCatalogCache();
+        log('✓ Кеш Store очищен', 'success');
+      }
+      const published = localStorage.getItem('publishedCatalog');
+      if (published) {
+        log(`ℹ В localStorage есть publishedCatalog (${(published.length / 1024).toFixed(1)} KB)`, 'info');
+      } else {
+        log('ℹ publishedCatalog не найден в localStorage', 'warning');
+      }
+    }
+
+    function updateUI() {
+      document.getElementById('productCount').textContent = catalog.length;
+      document.getElementById('lastUpdate').textContent = `Обновлено: ${new Date().toLocaleTimeString('uk-UA')}`;
+    }
+
+    // Слушаем события обновления
+    window.addEventListener('catalog:updated', async function(e) {
+      log('🔔 Получено событие catalog:updated!', 'success');
+      if (e.detail) {
+        log(`   Данные в событии: ${e.detail.data?.length || 0} товаров`, 'info');
+      }
+      await reloadCatalog();
+    });
+
+    // Слушаем storage события
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'publishedCatalog') {
+        log('🔔 Получено событие storage для publishedCatalog!', 'success');
+      }
+    });
+
+    // BroadcastChannel
+    if (window.BroadcastChannel) {
+      const channel = new BroadcastChannel('catalog-updates');
+      channel.addEventListener('message', function(event) {
+        log('📡 Получено сообщение через BroadcastChannel!', 'success');
+        log(`   Тип: ${event.data?.type}`, 'info');
+        log(`   Товаров: ${event.data?.data?.length || 0}`, 'info');
+      });
+      log('✓ BroadcastChannel подключен', 'success');
+    } else {
+      log('✗ BroadcastChannel не поддерживается', 'warning');
+    }
+
+    // Инициализация
+    (async function() {
+      log('🚀 Запуск тестовой страницы...', 'info');
+      await reloadCatalog();
+      log('✓ Готов к тестированию!', 'success');
+      
+      // Проверяем publishedCatalog
+      const published = localStorage.getItem('publishedCatalog');
+      if (published) {
+        const data = JSON.parse(published);
+        log(`ℹ Найден publishedCatalog: ${data.length} товаров`, 'info');
+      } else {
+        log('⚠ publishedCatalog не найден, будет использован catalog.json', 'warning');
+      }
+      
+      const timestamp = localStorage.getItem('catalogTimestamp');
+      if (timestamp) {
+        const date = new Date(parseInt(timestamp));
+        log(`🕒 Последнее обновление: ${date.toLocaleString('uk-UA')}`, 'info');
+      }
+      
+      // Проверяем обновления каждые 2 секунды
+      setInterval(() => {
+        const currentTimestamp = localStorage.getItem('catalogTimestamp') || '0';
+        const lastCheck = window._lastTimestampCheck || '0';
+        if (currentTimestamp !== lastCheck && currentTimestamp !== '0') {
+          log('🔔 Обнаружено изменение catalogTimestamp!', 'success');
+          window._lastTimestampCheck = currentTimestamp;
+          reloadCatalog();
+        }
+      }, 2000);
+    })();
+  </script>
+</body>
+</html>

@@ -11,10 +11,10 @@
       if(typeof mountHeader === 'function') mountHeader();
       if(typeof setSearchValueFromURL === 'function') setSearchValueFromURL();
 
-      const catalog = await loadJSON('./site_data/catalog.json');
+      let catalog = await (window.Store?.loadCatalog ? window.Store.loadCatalog() : loadJSON('./site_data/catalog.json'));
 
       const id = getParam('id');
-      const p = catalog.find(x=>String(x.id) === String(id));
+      let p = catalog.find(x=>String(x.id) === String(id));
       if(!p){ document.getElementById('product').innerHTML = '<div>Товар не знайдено.</div>'; return; }
 
       document.title = (p.title || 'Товар') + ' — STROYKLIMAT';
@@ -39,7 +39,8 @@
             <div class="meta"><span class="chip">${badge}</span> ${p.url ? `<a class="chip" href="${escapeHTML(p.url)}" target="_blank" rel="noreferrer">Відкрити на stroyklimat.net</a>` : ''}</div>
             <div class="bigprice">${fmtUAH(p.price_uah)}</div>
             <div class="buyrow">
-              <button class="btn primary" id="addCart">В кошик</button>
+              <button class="btn primary add-to-cart" id="addCart">В кошик</button>
+              <button class="btn primary price-request-btn" id="priceRequest">💬 Запросити ціну</button>
               <button class="btn" id="toggleFav">${favOn ? '★ В обраному' : '☆ Додати в обране'}</button>
               <a class="btn" href="tel:+380509735955">📞 Подзвонити</a>
             </div>
@@ -49,6 +50,13 @@
         document.querySelector('.thumbs')?.addEventListener('click', (e)=>{ const b = e.target.closest('[data-img]'); if(!b) return; active = b.getAttribute('data-img'); render(); });
 
         document.getElementById('addCart')?.addEventListener('click', ()=>{ if(window.Store && window.Store.addToCart) window.Store.addToCart(p, 1); if(typeof mountHeader === 'function') mountHeader(); });
+
+        document.getElementById('priceRequest')?.addEventListener('click', ()=>{ 
+          const mode = localStorage.getItem('storeMode') || 'shop';
+          if(mode === 'showcase' && window.Showcase) {
+            window.Showcase.showPriceRequestModal(p.id, p.title, p.price_uah);
+          }
+        });
 
         document.getElementById('toggleFav')?.addEventListener('click', ()=>{ if(window.Store && window.Store.toggleFav){ const on = window.Store.toggleFav(p.id); document.getElementById('toggleFav').textContent = on ? '★ В обраному' : '☆ Додати в обране'; if(typeof mountHeader === 'function') mountHeader(); } });
       }
@@ -68,7 +76,7 @@
         <article class="card" data-id="${escapeHTML(p.id)}">
           <a class="card-link" href="./product.html?id=${encodeURIComponent(p.id)}"></a>
           <div class="img">${img ? `<img loading="lazy" src="${escapeHTML(img)}" alt="${escapeHTML(p.title)}">` : `<div class="img-ph"></div>`}</div>
-          <div class="body"><div class="title">${escapeHTML(p.title)}</div><div class="price">${fmtUAH(p.price_uah)}</div><div class="row"><button class="btn btn-primary" data-add="${escapeHTML(p.id)}">В кошик</button><button class="btn btn-ghost fav" data-fav="${escapeHTML(p.id)}">${fav ? '♥' : '♡'}</button></div></div>
+          <div class="body"><div class="title">${escapeHTML(p.title)}</div><div class="price">${fmtUAH(p.price_uah)}</div><div class="row"><button class="btn btn-primary" data-add="${escapeHTML(p.id)}">В кошик</button><button class="btn btn-ghost fav" data-fav="${escapeHTML(p.id)}">Обране</button></div></div>
         </article>`; }
 
       document.getElementById('related').innerHTML = (related.map(cardHTML).join(''));
@@ -78,4 +86,7 @@
   }
 
   main();
+  
+  // Слушаем обновления от админ панели
+  window.addEventListener('catalog:updated', main);
 })();

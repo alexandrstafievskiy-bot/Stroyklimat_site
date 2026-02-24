@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theme Test - STROYKLIMAT</title>
+    <link rel="stylesheet" href="./assets/styles.css">
+    <style>
+        body { padding: 20px; }
+        .test-section { 
+            margin: 30px 0; 
+            padding: 20px; 
+            border: 2px solid var(--stroke);
+            border-radius: 12px;
+            background: var(--card);
+        }
+        .test-btn {
+            padding: 12px 20px;
+            margin: 10px 10px 10px 0;
+            cursor: pointer;
+            border: 1px solid var(--stroke);
+            border-radius: 8px;
+            background: var(--card);
+            color: var(--text);
+            font-size: 14px;
+        }
+        .test-btn:hover {
+            background: rgba(47,125,225,.15);
+            border-color: rgba(47,125,225,.35);
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        .status.pass { background: rgba(76,175,80,.3); color: #2e7d32; }
+        .status.fail { background: rgba(244,67,54,.3); color: #c62828; }
+        .theme-preview { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin: 15px 0;
+        }
+        .preview-box {
+            padding: 15px;
+            border: 1px solid var(--stroke);
+            border-radius: 8px;
+            background: var(--card);
+            color: var(--text);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Theme System Test</h1>
+        
+        <div class="test-section">
+            <h2>Current Theme</h2>
+            <p>Active Theme: <strong id="current-theme">dark</strong></p>
+            <button class="test-btn" onclick="testLightTheme()">🔆 Switch to Light Theme</button>
+            <button class="test-btn" onclick="testDarkTheme()">🌙 Switch to Dark Theme</button>
+            <button class="test-btn" onclick="testToggle()">⚡ Toggle Theme</button>
+            <button class="test-btn" onclick="clearStorage()">🗑 Clear Local Storage</button>
+        </div>
+
+        <div class="test-section">
+            <h2>🎯 Light Theme Preview</h2>
+            <div class="theme-preview">
+                <div class="preview-box">Text Color</div>
+                <div class="preview-box" style="background: var(--bg0);">Background 0</div>
+                <div class="preview-box" style="background: var(--bg1);">Background 1</div>
+                <div class="preview-box" style="background: var(--card);">Card</div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>CSS Variables Test</h2>
+            <div id="css-vars"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Component Samples</h2>
+            <h3>Buttons</h3>
+            <button class="btn">Regular</button>
+            <button class="btn primary">Primary</button>
+            <button id="themeToggle" class="theme-toggle">🌙</button>
+
+            <h3 style="margin-top: 20px;">Input Fields</h3>
+            <input type="text" placeholder="Text input" value="Sample text">
+            <input type="email" placeholder="Email input" style="margin-left: 10px;">
+
+            <h3 style="margin-top: 20px;">Cards</h3>
+            <div class="card" style="padding: 20px; margin-top: 10px;">
+                <strong>Card Sample</strong>
+                <p>This is a sample card element</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🧪 Test Results</h2>
+            <div id="test-results"></div>
+        </div>
+    </div>
+
+    <script src="./js/app.js"></script>
+    <script>
+        function updateThemeDisplay() {
+            const html = document.documentElement;
+            const theme = html.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+            document.getElementById('current-theme').textContent = theme.toUpperCase();
+            displayCSSVars();
+            runTests();
+        }
+
+        function displayCSSVars() {
+            const html = document.documentElement;
+            const vars = ['--bg0', '--bg1', '--card', '--text', '--muted', '--brand'];
+            const computed = getComputedStyle(html);
+            const varsHtml = vars.map(v => {
+                const val = computed.getPropertyValue(v).trim();
+                return `<div><code>${v}</code>: ${val}</div>`;
+            }).join('');
+            document.getElementById('css-vars').innerHTML = varsHtml;
+        }
+
+        function runTests() {
+            const html = document.documentElement;
+            const theme = html.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+            const results = [];
+
+            // Test 1: Theme attribute
+            results.push({
+                name: 'Theme attribute set',
+                pass: html.getAttribute('data-theme') !== null
+            });
+
+            // Test 2: CSS variables
+            const computed = getComputedStyle(html);
+            const bgColor = computed.getPropertyValue('--bg0').trim();
+            results.push({
+                name: 'CSS variables working',
+                pass: bgColor.length > 0
+            });
+
+            // Test 3: Theme button exists
+            const themeBtn = document.getElementById('themeToggle');
+            results.push({
+                name: 'Theme toggle button present',
+                pass: themeBtn !== null
+            });
+
+            // Test 4: Theme persistence
+            localStorage.setItem('theme', theme);
+            results.push({
+                name: 'Theme persistence (localStorage)',
+                pass: localStorage.getItem('theme') === theme
+            });
+
+            // Display results
+            const resultsHtml = results.map(r => 
+                `<p>${r.name} <span class="status ${r.pass ? 'pass' : 'fail'}">${r.pass ? '✓ PASS' : '✗ FAIL'}</span></p>`
+            ).join('');
+            document.getElementById('test-results').innerHTML = resultsHtml;
+        }
+
+        function testLightTheme() {
+            if (window.App && window.App.applyTheme) {
+                window.App.applyTheme('light');
+                updateThemeDisplay();
+            }
+        }
+
+        function testDarkTheme() {
+            if (window.App && window.App.applyTheme) {
+                window.App.applyTheme('dark');
+                updateThemeDisplay();
+            }
+        }
+
+        function testToggle() {
+            if (window.App && window.App.toggleTheme) {
+                window.App.toggleTheme();
+                updateThemeDisplay();
+            }
+        }
+
+        function clearStorage() {
+            localStorage.removeItem('theme');
+            localStorage.removeItem('cart');
+            localStorage.removeItem('fav');
+            alert('Local storage cleared. Page will reload...');
+            location.reload();
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', updateThemeDisplay);
+        if (document.readyState !== 'loading') {
+            updateThemeDisplay();
+        }
+    </script>
+</body>
+</html>

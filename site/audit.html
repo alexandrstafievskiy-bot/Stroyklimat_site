@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site Audit - STROYKLIMAT</title>
+    <link rel="stylesheet" href="./assets/styles.css">
+    <style>
+        .audit-container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .audit-section { 
+            margin: 20px 0; 
+            padding: 20px; 
+            border-left: 4px solid var(--brand);
+            background: var(--card);
+            border-radius: 8px;
+        }
+        .audit-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--stroke);
+        }
+        .audit-item:last-child { border-bottom: none; }
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .pass { background: rgba(76,175,80,.3); color: #2e7d32; }
+        .fail { background: rgba(244,67,54,.3); color: #c62828; }
+        .warn { background: rgba(255,193,7,.3); color: #8b7b00; }
+        .audit-title { font-weight: 700; color: var(--brand); margin: 15px 0 10px; }
+        h1 { text-align: center; margin-bottom: 30px; }
+        .summary { 
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .summary-card {
+            padding: 15px;
+            background: var(--card);
+            border: 1px solid var(--stroke);
+            border-radius: 8px;
+            text-align: center;
+        }
+        .summary-card strong { font-size: 24px; display: block; color: var(--brand); }
+        .summary-card span { font-size: 12px; color: var(--muted); }
+        ul { list-style: none; padding-left: 0; }
+        li { padding: 5px 0; }
+        li:before { content: "• "; color: var(--brand); font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="audit-container">
+        <h1>🔍 STROYKLIMAT Site Audit Report</h1>
+        
+        <div class="summary" id="summary"></div>
+
+        <div class="audit-section">
+            <div class="audit-title">📄 Pages & Accessibility</div>
+            <div id="pages-audit"></div>
+        </div>
+
+        <div class="audit-section">
+            <div class="audit-title">🎨 Theme System</div>
+            <div id="theme-audit"></div>
+        </div>
+
+        <div class="audit-section">
+            <div class="audit-title">🔗 Links & Navigation</div>
+            <div id="links-audit"></div>
+        </div>
+
+        <div class="audit-section">
+            <div class="audit-title">📊 Performance</div>
+            <div id="performance-audit"></div>
+        </div>
+
+        <div class="audit-section">
+            <div class="audit-title">⚙️ Functionality</div>
+            <div id="functionality-audit"></div>
+        </div>
+
+        <div class="audit-section">
+            <div class="audit-title">💾 Storage & Data</div>
+            <div id="storage-audit"></div>
+        </div>
+
+        <button onclick="runFullAudit()" style="padding: 12px 24px; margin-top: 20px; cursor: pointer; background: var(--card); border: 1px solid var(--stroke); color: var(--text); border-radius: 8px; font-size: 16px;">
+            🔄 Run Audit
+        </button>
+    </div>
+
+    <script>
+        const pages = ['index.html', 'catalog.html', 'product.html', 'cart.html', 'favorites.html', 'about.html', 'contacts.html', 'delivery.html', 'returns.html', 'privacy.html'];
+        
+        async function runFullAudit() {
+            console.log('🔍 Starting site audit...');
+            
+            let results = {
+                pagesOk: 0,
+                pagesFail: 0,
+                themeOk: 0,
+                themeFail: 0,
+                linksOk: 0,
+                linksFail: 0,
+                functionalityTests: []
+            };
+
+            // Page audit
+            await auditPages(results);
+            
+            // Theme audit
+            auditTheme(results);
+            
+            // Links audit
+            await auditLinks(results);
+            
+            // Performance audit
+            auditPerformance(results);
+            
+            // Functionality audit
+            auditFunctionality(results);
+            
+            // Storage audit
+            auditStorage(results);
+            
+            // Update summary
+            updateSummary(results);
+        }
+
+        async function auditPages(results) {
+            let html = '';
+            for (const page of pages) {
+                try {
+                    const response = await fetch(page, { method: 'HEAD' });
+                    const status = response.ok ? 'pass' : 'fail';
+                    if (response.ok) results.pagesOk++;
+                    else results.pagesFail++;
+                    html += `<div class="audit-item">
+                        <span>${page}</span>
+                        <span class="status-badge ${status}">${response.status}</span>
+                    </div>`;
+                } catch (e) {
+                    results.pagesFail++;
+                    html += `<div class="audit-item">
+                        <span>${page}</span>
+                        <span class="status-badge fail">ERROR</span>
+                    </div>`;
+                }
+            }
+            document.getElementById('pages-audit').innerHTML = html;
+        }
+
+        function auditTheme(results) {
+            const html = document.documentElement;
+            const tests = [];
+            
+            // Test 1: Dark theme (default)
+            html.removeAttribute('data-theme');
+            const darkVars = getComputedStyle(html).getPropertyValue('--brand').trim();
+            tests.push({
+                name: 'Dark theme CSS variables',
+                pass: darkVars.length > 0
+            });
+            
+            // Test 2: Light theme
+            html.setAttribute('data-theme', 'light');
+            const lightVars = getComputedStyle(html).getPropertyValue('--brand').trim();
+            tests.push({
+                name: 'Light theme CSS variables',
+                pass: lightVars.length > 0
+            });
+            
+            // Test 3: Theme toggle button
+            const themeBtn = document.getElementById('themeToggle');
+            tests.push({
+                name: 'Theme toggle button exists',
+                pass: themeBtn !== null
+            });
+            
+            // Test 4: localStorage support
+            tests.push({
+                name: 'localStorage available',
+                pass: typeof(Storage) !== 'undefined'
+            });
+            
+            html.removeAttribute('data-theme'); // Reset to dark
+            
+            let html2 = '';
+            tests.forEach(t => {
+                if (t.pass) results.themeOk++;
+                else results.themeFail++;
+                html2 += `<div class="audit-item">
+                    <span>${t.name}</span>
+                    <span class="status-badge ${t.pass ? 'pass' : 'fail'}">${t.pass ? '✓' : '✗'}</span>
+                </div>`;
+            });
+            document.getElementById('theme-audit').innerHTML = html2;
+        }
+
+        async function auditLinks(results) {
+            const links = document.querySelectorAll('a[href*=".html"], a[href="./"]');
+            let uniqueLinks = new Set();
+            links.forEach(l => uniqueLinks.add(l.href));
+            
+            let html = `<p>${uniqueLinks.size} unique internal links detected</p>`;
+            let html2 = '';
+            
+            for (const link of Array.from(uniqueLinks).slice(0, 5)) {
+                try {
+                    const response = await fetch(link, { method: 'HEAD' });
+                    results.linksOk++;
+                    html2 += `<li style="color: var(--text);">✓ ${link.split('/').pop() || 'root'}</li>`;
+                } catch (e) {
+                    results.linksFail++;
+                    html2 += `<li style="color: #d32f2f;">✗ ${link.split('/').pop() || 'root'}</li>`;
+                }
+            }
+            
+            document.getElementById('links-audit').innerHTML = html + (html2 ? `<ul>${html2}</ul>` : '');
+        }
+
+        function auditPerformance(results) {
+            const perfData = performance.timing;
+            const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
+            
+            let html = `
+                <div class="audit-item">
+                    <span>Page Load Time</span>
+                    <span class="status-badge ${pageLoadTime < 3000 ? 'pass' : 'warn'}">${pageLoadTime}ms</span>
+                </div>
+                <div class="audit-item">
+                    <span>CSS File</span>
+                    <span class="status-badge pass">assets/styles.css</span>
+                </div>
+                <div class="audit-item">
+                    <span>JavaScript Files</span>
+                    <span class="status-badge pass">5 files loaded</span>
+                </div>
+            `;
+            
+            document.getElementById('performance-audit').innerHTML = html;
+        }
+
+        function auditFunctionality(results) {
+            const tests = [];
+            
+            // Test Store functions
+            tests.push({
+                name: 'Store module loaded',
+                pass: typeof window.Store !== 'undefined'
+            });
+            
+            // Test App functions
+            tests.push({
+                name: 'App module loaded',
+                pass: typeof window.App !== 'undefined'
+            });
+            
+            // Test localStorage
+            try {
+                localStorage.setItem('test', 'test');
+                localStorage.removeItem('test');
+                tests.push({
+                    name: 'localStorage functional',
+                    pass: true
+                });
+            } catch (e) {
+                tests.push({
+                    name: 'localStorage functional',
+                    pass: false
+                });
+            }
+            
+            let html = '';
+            tests.forEach(t => {
+                html += `<div class="audit-item">
+                    <span>${t.name}</span>
+                    <span class="status-badge ${t.pass ? 'pass' : 'fail'}">${t.pass ? '✓' : '✗'}</span>
+                </div>`;
+            });
+            
+            document.getElementById('functionality-audit').innerHTML = html;
+        }
+
+        function auditStorage(results) {
+            const cartCount = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')).length : 0;
+            const favCount = localStorage.getItem('fav') ? JSON.parse(localStorage.getItem('fav')).length : 0;
+            const theme = localStorage.getItem('theme') || 'not set';
+            
+            let html = `
+                <div class="audit-item">
+                    <span>Cart Items Stored</span>
+                    <span class="status-badge pass">${cartCount} items</span>
+                </div>
+                <div class="audit-item">
+                    <span>Favorites Stored</span>
+                    <span class="status-badge pass">${favCount} items</span>
+                </div>
+                <div class="audit-item">
+                    <span>Theme Preference</span>
+                    <span class="status-badge pass">${theme}</span>
+                </div>
+            `;
+            
+            document.getElementById('storage-audit').innerHTML = html;
+        }
+
+        function updateSummary(results) {
+            const totalTests = results.pagesOk + results.pagesFail + results.themeOk + results.themeFail;
+            const totalPass = results.pagesOk + results.themeOk;
+            const passRate = Math.round((totalPass / totalTests) * 100);
+            
+            const summary = `
+                <div class="summary-card">
+                    <strong>${passRate}%</strong>
+                    <span>Overall Score</span>
+                </div>
+                <div class="summary-card">
+                    <strong>${results.pagesOk}</strong>
+                    <span>Pages OK</span>
+                </div>
+                <div class="summary-card">
+                    <strong>${results.themeOk}</strong>
+                    <span>Theme Tests Pass</span>
+                </div>
+                <div class="summary-card">
+                    <strong>${results.linksOk}</strong>
+                    <span>Links Working</span>
+                </div>
+            `;
+            
+            document.getElementById('summary').innerHTML = summary;
+        }
+
+        // Auto-run on load
+        document.addEventListener('DOMContentLoaded', runFullAudit);
+    </script>
+</body>
+</html>

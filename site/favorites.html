@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Обране — STROYKLIMAT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./assets/styles.css"/>
+</head>
+<body>
+  <header class="topbar">
+    <div class="container">
+      <div class="topbar-inner">
+        <a class="brand" href="./index.html">
+          <div class="logo"><img src="./assets/logo.svg" alt="logo"/></div>
+          <div class="name"><strong>STROYKLIMAT</strong><span>ТОВ "Бис 7"</span></div>
+        </a>
+        <form class="search" data-search-form>
+          <input data-search-input placeholder="Пошук товарів…"/>
+          <button type="submit">Пошук</button>
+        </form>
+        <nav class="actions">
+          <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme" title="Переключить тему">🌙</button>
+          <a class="pill" href="./favorites.html">Обране <b data-fav-count>0</b></a>
+          <a class="pill" href="./cart.html">Кошик <b data-cart-count>0</b></a>
+        </nav>
+      </div>
+      <div class="navline">
+        <div class="nav">
+          <a class="chip" href="./catalog.html">Каталог</a>
+          <a class="chip" href="./about.html">Про нас</a>
+          <a class="chip" href="./delivery.html">Доставка і оплата</a>
+          <a class="chip" href="./testimonials.html">⭐ Відгуки</a>
+          <a class="chip" href="./returns.html">Повернення</a>
+          <a class="chip" href="./contacts.html">Контакти</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="container">
+      <div class="grid-head">
+        <h2>Обране</h2>
+        <div class="small" id="meta">—</div>
+      </div>
+      <div class="cards" id="list"></div>
+    </div>
+  </main>
+
+  <footer class="footer"><div class="container">© STROYKLIMAT (ТОВ "Бис 7")</div></footer>
+
+  <script src="./js/store.js"></script>
+  <script src="./js/app.js"></script>
+  <script>
+    // Using store.js and app.js functions from global scope
+    function cardHTML(p){
+      const img = getPrimaryImage(p.images) || "";
+      const badge = p.stock === "on_order" ? "Під замовлення" : "В наявності";
+      const fav = isFav(p.id);
+      return `
+        <div class="card">
+          <a href="./product.html?id=${encodeURIComponent(p.id)}">
+            <div class="thumb">
+              <span class="badge">${badge}</span>
+              <img loading="lazy" src="${escapeHTML(img)}" alt="${escapeHTML(p.title)}"/>
+            </div>
+          </a>
+          <div class="card-body">
+            <p class="title">${escapeHTML(p.title)}</p>
+            <div class="price-row">
+              <div class="price">${formatUAH(p.price_uah)}</div>
+              <div class="muted">${p.stock === "on_order" ? "під замовлення" : "в наявності"}</div>
+            </div>
+            <div class="card-actions">
+              <button class="iconbtn primary" data-add="${escapeHTML(p.id)}">В кошик</button>
+              <button class="iconbtn" data-fav="${escapeHTML(p.id)}">${fav ? "★" : "☆"} Обране</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    (async function(){
+      mountHeader();
+      if(typeof setSearchValueFromURL === 'function') setSearchValueFromURL();
+      const catalog = await (window.Store && window.Store.loadCatalog ? window.Store.loadCatalog() : []);
+      const favIds = (window.getFav ? window.getFav() : []);
+      const list = favIds.map(id => catalog.find(p=>p.id===id)).filter(Boolean);
+
+      document.getElementById("meta").textContent = `Всього: ${list.length}`;
+
+      const el = document.getElementById("list");
+      el.innerHTML = list.length ? list.map(cardHTML).join("") : `<div class="muted">Поки що порожньо.</div>`;
+
+      el.addEventListener("click", (e)=>{
+        const add = e.target.closest("[data-add]");
+        const fav = e.target.closest("[data-fav]");
+        if(add){
+          (window.addToCart || function(){})(add.getAttribute("data-add"), 1);
+          mountHeader();
+        }
+        if(fav){
+          const id = fav.getAttribute("data-fav");
+          const on = (window.toggleFav || function(){return false;})(id);
+          fav.textContent = (on ? "★" : "☆") + " Обране";
+          mountHeader();
+          location.reload();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
