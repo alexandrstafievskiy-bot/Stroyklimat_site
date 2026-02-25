@@ -40,7 +40,7 @@
           </div>
           <div class="kv">
             <h1>${escapeHTML(p.title)}</h1>
-            <div class="meta"><span class="chip">${badge}</span> ${p.url ? `<a class="chip" href="${escapeHTML(p.url)}" target="_blank" rel="noreferrer">Відкрити на stroyklimat.net</a>` : ''}</div>
+            <div class="meta"><span class="chip">${badge}</span></div>
             <div class="bigprice">${fmtUAH(p.price_uah)}</div>
             <div class="buyrow">
               <button class="btn primary add-to-cart" id="addCart">В кошик</button>
