@@ -1,20 +1,28 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="219" height="297" viewBox="0 0 219 297">
-<rect width="219" height="297" fill="#000"/>
-<g fill="#fff" fill-rule="evenodd">
-<path d="M 184 267 L 181 273 L 189 281 L 181 284 L 188 286 L 194 280 L 185 271 L 192 270 Z"/>
-<path d="M 173 267 L 169 278 L 159 269 L 159 286 L 162 275 L 174 283 Z"/>
-<path d="M 140 267 L 135 270 L 132 277 L 136 284 L 144 286 L 149 284 L 152 274 L 145 267 Z M 142 270 L 149 276 L 145 282 L 139 282 L 137 280 L 137 274 Z"/>
-<path d="M 123 267 L 123 286 L 125 286 L 125 267 Z"/>
-<path d="M 102 267 L 102 271 L 108 273 L 107 283 L 110 286 L 110 272 L 116 268 Z"/>
-<path d="M 81 267 L 81 282 L 87 286 L 93 284 L 95 267 L 91 282 L 83 280 Z"/>
-<path d="M 63 267 L 63 284 L 74 286 L 74 282 L 65 280 L 66 269 Z"/>
-<path d="M 44 267 L 39 270 L 36 277 L 39 284 L 48 286 L 53 284 L 56 274 L 49 267 Z M 46 270 L 53 276 L 49 282 L 43 282 L 41 280 L 41 274 Z"/>
-<path d="M 22 267 L 18 274 L 27 281 L 18 281 L 18 284 L 26 286 L 30 278 L 22 272 L 30 271 Z"/>
-<path d="M 153 198 L 154 207 L 168 207 L 168 246 L 177 246 L 177 208 L 193 206 L 193 199 Z"/>
-<path d="M 108 198 L 108 246 L 117 213 L 146 246 L 146 198 L 137 230 Z"/>
-<path d="M 66 198 L 66 245 L 98 246 L 98 237 L 75 235 L 79 224 L 95 225 L 76 207 L 98 206 L 98 198 Z"/>
-<path d="M 18 198 L 33 245 L 43 247 L 59 198 L 51 198 L 40 234 L 29 199 Z"/>
-<path d="M 75 66 L 63 101 L 96 134 L 129 119 Z"/>
-<path d="M 81 60 L 137 111 L 149 78 L 118 48 Z"/>
-<path d="M 91 21 L 48 49 L 36 104 L 68 149 L 121 158 L 167 124 L 173 68 L 143 30 Z M 97 29 L 133 35 L 165 73 L 156 124 L 116 150 L 73 141 L 44 97 L 53 58 Z"/>
-</g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 280" width="200" height="280">
+  <!-- Background -->
+  <rect width="200" height="280" fill="transparent"/>
+  
+  <!-- Circle with ventilation symbol -->
+  <g transform="translate(100, 80)">
+    <!-- Outer circle -->
+    <circle cx="0" cy="0" r="60" fill="none" stroke="currentColor" stroke-width="8"/>
+    <!-- Diagonal line (prohibition symbol) -->
+    <line x1="-42" y1="42" x2="42" y2="-42" stroke="currentColor" stroke-width="8" stroke-linecap="round"/>
+    <!-- Inner circle -->
+    <circle cx="0" cy="0" r="42" fill="none" stroke="currentColor" stroke-width="6"/>
+    <!-- Ventilation blades/slats -->
+    <g opacity="0.9">
+      <path d="M -25,-15 L -25,15" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+      <path d="M 0,-20 L 0,20" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+      <path d="M 25,-15 L 25,15" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+    </g>
+  </g>
+  
+  <!-- VENT text -->
+  <text x="100" y="200" font-family="'Arial Black', Arial, sans-serif" font-size="48" font-weight="900" 
+        fill="currentColor" text-anchor="middle" letter-spacing="3">VENT</text>
+  
+  <!-- SOLUTIONS text -->
+  <text x="100" y="235" font-family="Arial, sans-serif" font-size="22" font-weight="400" 
+        fill="currentColor" text-anchor="middle" letter-spacing="6">SOLUTIONS</text>
+</svg>
