@@ -1,50 +1,94 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Відгуки клієнтів — STROYKLIMAT</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Відгуки клієнтів STROYKLIMAT — Реальні враження про вентиляцію і кондиціонування</title>
+
+  <meta name="description" content="Читайте реальні відгуки клієнтів STROYKLIMAT про якість систем вентиляції, кондиціонування та монтажу. 78+ позитивних оцінок 5 зірок від задоволених користувачів."/>
+  <meta name="keywords" content="відгуки, відзиви, STROYKLIMAT, вентиляція, кондиціонування, монтаж, якість, обслуговування"/>
+  <meta name="theme-color" content="#07131f"/>
   <link rel="icon" type="image/svg+xml" href="./assets/logo.svg"/>
+  <link rel="canonical" href="./testimonials.html"/>
+
+  <meta property="og:title" content="Відгуки клієнтів STROYKLIMAT"/>
+  <meta property="og:description" content="78+ позитивних оцінок 5 зірок від задоволених клієнтів про вентиляцію, кондиціонування та монтаж"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:image" content="./assets/og.svg"/>
+
   <link rel="stylesheet" href="./assets/styles.css"/>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Collection",
+      "name": "Відгуки STROYKLIMAT",
+      "description": "Реальні відгуки клієнтів про якість услуг вентиляції і кондиціонування",
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "5",
+        "reviewCount": "78"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "STROYKLIMAT (ТОВ \"Бис 7\")",
+        "url": "https://stroyklimat.ua",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://stroyklimat.ua/assets/logo.svg"
+        }
+      }
+    }
+    </script>
 </head>
+
 <body>
   <header class="topbar">
-    <div class="container topbar-inner">
-      <a class="brand" href="./index.html">
-        <div class="logo"><img src="./assets/logo.svg" alt="STROYKLIMAT"/></div>
-        <div class="name">
-          <strong>STROYKLIMAT</strong>
+    <div class="container">
+      <div class="topbar-inner">
+        <a class="brand" href="./index.html" aria-label="STROYKLIMAT Home">
+          <div class="logo"><img src="./assets/logo.svg" alt="STROYKLIMAT"/></div>
+          <div class="name">
+            <strong>STROYKLIMAT</strong>
+          </div>
+        </a>
 
-        </div>
-      </a>
-      <div class="search">
-        <input type="search" placeholder="🔍 Пошук..."/>
+        <form class="search" data-search-form>
+          <input data-search-input placeholder="Пошук: вентилятор, кондиціонер, димохід…"/>
+          <button type="submit">🔍</button>
+        </form>
+
+        <nav class="actions">
+          <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme" title="Переключити тему">🌙</button>
+          <a class="pill" href="./favorites.html">Обране <b data-fav-count>0</b></a>
+          <a class="pill" href="./cart.html">🛒 Кошик <b data-cart-count>0</b></a>
+        </nav>
       </div>
-      <div class="actions">
-        <a href="./favorites.html" class="pill">❤️ <span data-fav-count>0</span></a>
-        <a href="./cart.html" class="pill">🛒 <span data-cart-count>0</span></a>
-        <button class="pill" id="theme-toggle">🌙</button>
-      </div>
+
       <div class="navline">
-        <a href="./index.html" class="navlink">Головна</a>
-        <a href="./catalog.html" class="navlink">Каталог</a>
-        <a href="./about.html" class="navlink">Про нас</a>
-        <a href="./delivery.html" class="navlink">Доставка</a>
-        <a href="./testimonials.html" class="navlink" style="color: var(--brand);">Відгуки</a>
-        <a href="./contacts.html" class="navlink">Контакти</a>
+        <div class="nav">
+          <a class="chip" href="./catalog.html">Каталог</a>
+          <a class="chip" href="./about.html">Про нас</a>
+          <a class="chip" href="./delivery.html">Доставка і оплата</a>
+          <a class="chip" href="./testimonials.html">⭐ Відгуки</a>
+          <a class="chip" href="./returns.html">Повернення</a>
+          <a class="chip" href="./contacts.html">Контакти</a>
+        </div>
       </div>
     </div>
   </header>
 
-  <main class="container">
-    <section class="block" style="margin-top: 24px;">
-      <h1 style="margin: 0 0 12px;">⭐ Відгуки про компанію ТОВ "Бис 7"</h1>
-      <p class="muted" style="margin: 0 0 24px;">Наші клієнти діляться враженнями про співпрацю з нами. Дякуємо за довіру!</p>
+  <main class="page">
+    <div class="container">
+      <div class="panel">
+        <div class="panel-inner">
+          <h1 style="margin: 0 0 12px;">⭐ Відгуки клієнтів</h1>
+          <p class="muted" style="margin: 0 0 24px;">Читайте реальні враження наших клієнтів про якість обслуговування, швидкість доставки та якість кліматичного обладнання</p>
 
-      <!-- Testimonials Grid -->
-      <div class="testimonials-grid">
-        <!-- Testimonial 1 -->
-        <div class="testimonial-card">
+            <!-- Testimonials Grid -->
+            <div class="testimonials-grid">
+              <!-- Testimonial 1 -->
+              <div class="testimonial-card">
           <div class="testimonial-card-header">
             <div>
               <strong>Покупець</strong>
@@ -217,63 +261,65 @@
             <span class="badge">📞 Швидко зв'язались</span>
           </div>
         </div>
+
+        </div>
       </div>
-
-      <!-- Add Review Form -->
-      <div class="review-form-section" style="margin-top: 48px;">
-        <h2 style="margin: 0 0 16px;">📝 Залишити відгук</h2>
-        <p class="muted" style="margin: 0 0 24px;">Ваш досвід важливий для нас і допомагає іншим клієнтам</p>
-        
-        <form class="review-form" id="reviewForm">
-          <div class="form-grid">
-            <div class="form-group">
-              <label class="form-label">Ваше ім'я *</label>
-              <input type="text" class="form-input" name="name" required placeholder="Іван Петренко"/>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Email *</label>
-              <input type="email" class="form-input" name="email" required placeholder="ivan@example.com"/>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Оцінка *</label>
-            <div class="rating-input" id="ratingInput">
-              <span class="star" data-rating="1">⭐</span>
-              <span class="star" data-rating="2">⭐</span>
-              <span class="star" data-rating="3">⭐</span>
-              <span class="star" data-rating="4">⭐</span>
-              <span class="star" data-rating="5">⭐</span>
-            </div>
-            <input type="hidden" name="rating" id="ratingValue" required/>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Ваш відгук *</label>
-            <textarea class="form-textarea" name="review" required placeholder="Поділіться своїм досвідом співпраці з нами..." rows="5"></textarea>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Товар/послуга (не обов'язково)</label>
-            <input type="text" class="form-input" name="product" placeholder="Наприклад: Кондиціонер Gree"/>
-          </div>
-
-          <button type="submit" class="btn primary">Відправити відгук</button>
-        </form>
-
-        <div id="formMessage" class="form-message" style="display: none;"></div>
-      </div>
-    </section>
+    </div>
   </main>
 
+  <!-- Footer -->
   <footer class="footer">
     <div class="container">
-      <div style="display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
-        <div style="opacity: .75;">© <span id="y">2024</span> ТОВ "Бис 7". Всі права захищені.</div>
-        <div class="footer-links">
-          <a href="./privacy.html">Політика конфіденційності</a>
-          <a href="./returns.html">Повернення</a>
+      <div style="max-width: 1200px; margin: 0 auto;">
+        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1.3fr; gap: 40px; margin-bottom: 30px;">
+          <!-- Column 1: About -->
+          <div>
+            <div style="font-weight: 700; margin-bottom: 12px; font-size: 14px;">Про STROYKLIMAT</div>
+            <p style="font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 12px;">
+              Надійний партнер в обласні HVAC обладнання для України з 2015 року. Каталог 1250+ позицій від провідних брендів.
+            </p>
+            <a href="./about.html" class="link" style="font-size: 13px;">Детальніше про нас →</a>
+          </div>
+
+          <!-- Column 2: Services -->
+          <div>
+            <div style="font-weight: 700; margin-bottom: 12px; font-size: 14px;">Послуги</div>
+            <ul style="list-style: none; padding: 0; font-size: 13px; line-height: 2;">
+              <li><a href="./catalog.html" class="link">Каталог</a></li>
+              <li><a href="./contacts.html" class="link">Проектування</a></li>
+              <li><a href="./delivery.html" class="link">Монтаж</a></li>
+              <li><a href="./contacts.html" class="link">Сервіс</a></li>
+            </ul>
+          </div>
+
+          <!-- Column 3: Support -->
+          <div>
+            <div style="font-weight: 700; margin-bottom: 12px; font-size: 14px;">Підтримка</div>
+            <ul style="list-style: none; padding: 0; font-size: 13px; line-height: 2;">
+              <li><a href="./delivery.html" class="link">Доставка</a></li>
+              <li><a href="./returns.html" class="link">Повернення</a></li>
+              <li><a href="./privacy.html" class="link">Політика</a></li>
+              <li><a href="./contacts.html" class="link">Контакти</a></li>
+            </ul>
+          </div>
+
+          <!-- Column 4: Contacts -->
+          <div>
+            <div style="font-weight: 700; margin-bottom: 12px; font-size: 14px;">Контакти</div>
+            <div style="font-size: 13px; line-height: 1.8;">
+              <div>📞 <a href="tel:+380509735955" class="link">+38 (050) 973-59-55</a></div>
+              <div>📧 <a href="mailto:denis_bis@ukr.net" class="link">denis_bis@ukr.net</a></div>
+              <div style="margin-top: 8px; color: var(--muted); font-size: 12px;">
+                ПН-ПТ: 9:00-18:00<br>
+                СБ-НД: 10:00-15:00
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="border-top: 1px solid var(--stroke); padding-top: 16px; text-align: center; font-size: 12px; color: var(--muted);">
+          © 2024 STROYKLIMAT (ТОВ "Бис 7"). Всі права захищені. | 
+          <a href="./privacy.html" class="link">Політика конфіденційності</a>
         </div>
       </div>
     </div>
@@ -281,92 +327,8 @@
 
   <script src="./js/app.js"></script>
   <script>
-    // Rating stars functionality
-    const stars = document.querySelectorAll('.star');
-    const ratingValue = document.getElementById('ratingValue');
-    let selectedRating = 0;
-
-    stars.forEach(star => {
-      star.addEventListener('click', () => {
-        selectedRating = parseInt(star.dataset.rating);
-        ratingValue.value = selectedRating;
-        updateStars();
-      });
-
-      star.addEventListener('mouseenter', () => {
-        const rating = parseInt(star.dataset.rating);
-        highlightStars(rating);
-      });
-    });
-
-    document.getElementById('ratingInput').addEventListener('mouseleave', () => {
-      updateStars();
-    });
-
-    function highlightStars(rating) {
-      stars.forEach((star, index) => {
-        if (index < rating) {
-          star.style.opacity = '1';
-          star.style.filter = 'grayscale(0)';
-        } else {
-          star.style.opacity = '0.3';
-          star.style.filter = 'grayscale(1)';
-        }
-      });
-    }
-
-    function updateStars() {
-      highlightStars(selectedRating);
-    }
-
-    // Initialize stars
-    stars.forEach(star => {
-      star.style.cursor = 'pointer';
-      star.style.opacity = '0.3';
-      star.style.filter = 'grayscale(1)';
-      star.style.transition = 'all 0.2s ease';
-      star.style.fontSize = '28px';
-    });
-
-    // Form submission
-    document.getElementById('reviewForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      
-      const formData = new FormData(e.target);
-      const data = Object.fromEntries(formData);
-      
-      // Save to localStorage (in real app, send to server)
-      const reviews = JSON.parse(localStorage.getItem('reviews') || '[]');
-      reviews.push({
-        ...data,
-        date: new Date().toISOString(),
-        id: Date.now()
-      });
-      localStorage.setItem('reviews', JSON.stringify(reviews));
-
-      // Show success message
-      const message = document.getElementById('formMessage');
-      message.style.display = 'block';
-      message.style.padding = '16px';
-      message.style.borderRadius = '12px';
-      message.style.background = 'rgba(47, 125, 225, 0.1)';
-      message.style.border = '1px solid rgba(47, 125, 225, 0.3)';
-      message.style.marginTop = '16px';
-      message.innerHTML = '✅ Дякуємо за ваш відгук! Він з\'явиться після модерації.';
-
-      // Reset form
-      e.target.reset();
-      selectedRating = 0;
-      updateStars();
-
-      // Hide message after 5 seconds
-      setTimeout(() => {
-        message.style.display = 'none';
-      }, 5000);
-    });
-
-    // Update year
-    document.getElementById('y').textContent = new Date().getFullYear();
+    mountHeader();
+    setSearchValueFromURL();
   </script>
 </body>
 </html>
