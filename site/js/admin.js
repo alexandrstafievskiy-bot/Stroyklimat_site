@@ -158,20 +158,23 @@ window.Admin = (function() {
   }
 
   async function verifyPin(pin) {
-    try {
-      const response = await fetch('./api/catalog.php?action=auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        cache: 'no-store',
-        body: JSON.stringify({ password: pin })
-      });
-      if (!response.ok) return false;
-      const payload = await response.json();
-      return !!payload.success;
-    } catch (err) {
-      console.error('PIN verification failed:', err);
-      return false;
+    const response = await fetch('./api/catalog.php?action=auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store',
+      body: JSON.stringify({ password: pin })
+    });
+    if (response.status === 401) return false;
+    if (!response.ok) {
+      let msg = 'Помилка сервера';
+      try {
+        const payload = await response.json();
+        if (payload && payload.error) msg = payload.error;
+      } catch { /* JSON parse failed; fall back to generic message */ }
+      throw new Error(msg);
     }
+    const payload = await response.json();
+    return !!payload.success;
   }
 
   async function login() {
@@ -180,15 +183,20 @@ window.Admin = (function() {
       showAlert('Введіть PIN', 'warning');
       return;
     }
-    const isValid = await verifyPin(pin);
-    if (isValid) {
-      sessionStorage.setItem(AUTH_KEY, 'true');
-      document.querySelector('.admin-wrapper').style.display = 'grid';
-      document.getElementById('loginModal').style.display = 'none';
-      setupUI();
-      loadCatalog().then(() => renderProducts());
-    } else {
-      showAlert('Невірний PIN', 'error');
+    try {
+      const isValid = await verifyPin(pin);
+      if (isValid) {
+        sessionStorage.setItem(AUTH_KEY, 'true');
+        document.querySelector('.admin-wrapper').style.display = 'grid';
+        document.getElementById('loginModal').style.display = 'none';
+        setupUI();
+        loadCatalog().then(() => renderProducts());
+      } else {
+        showAlert('Невірний PIN', 'error');
+      }
+    } catch (err) {
+      console.error('PIN verification failed:', err);
+      showAlert(err.message || 'Помилка з\'єднання з сервером', 'error');
     }
   }
 
