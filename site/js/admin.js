@@ -157,17 +157,14 @@ window.Admin = (function() {
     return sessionStorage.getItem(AUTH_KEY) === 'true';
   }
 
+  // Admin password (in production, use proper authentication)
+  const ADMIN_PASSWORD = 'StroyKKlimat2026';
+
   async function verifyPin(pin) {
     try {
-      const response = await fetch('./api/catalog.php?action=auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        cache: 'no-store',
-        body: JSON.stringify({ password: pin })
-      });
-      if (!response.ok) return false;
-      const payload = await response.json();
-      return !!payload.success;
+      // Client-side verification (for demo/development)
+      // In production, use secure server authentication
+      return pin === ADMIN_PASSWORD;
     } catch (err) {
       console.error('PIN verification failed:', err);
       return false;
