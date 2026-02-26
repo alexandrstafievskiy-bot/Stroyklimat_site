@@ -9,7 +9,11 @@ define('DB_PATH', __DIR__ . '/../data/stroyklimat.db');
 
 // Admin credentials
 $adminPassword = getenv('STROYKLIMAT_ADMIN_PASSWORD');
-define('ADMIN_PASSWORD', ($adminPassword !== false && $adminPassword !== '') ? $adminPassword : 'CHANGE_ME');
+if ($adminPassword === false || $adminPassword === '') {
+    error_log('WARNING: STROYKLIMAT_ADMIN_PASSWORD is not set; using default demo password. Set this variable in production.');
+    $adminPassword = '1234';
+}
+define('ADMIN_PASSWORD', $adminPassword);
 
 // CORS settings
 $allowOrigin = getenv('STROYKLIMAT_ALLOW_ORIGIN');
