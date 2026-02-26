@@ -175,20 +175,46 @@ window.Admin = (function() {
   }
 
   async function login() {
-    const pin = (document.getElementById('adminPin').value || '').trim();
+    const pinInput = document.getElementById('adminPin');
+    const pin = (pinInput.value || '').trim();
+    const loginError = document.getElementById('loginError');
+    
+    // Скрыть ошибку при новой попытке
+    loginError.style.display = 'none';
+    pinInput.style.borderColor = 'var(--stroke)';
+    
     if (!pin) {
       showAlert('Введіть PIN', 'warning');
       return;
     }
+    
     const isValid = await verifyPin(pin);
     if (isValid) {
       sessionStorage.setItem(AUTH_KEY, 'true');
       document.querySelector('.admin-wrapper').style.display = 'grid';
       document.getElementById('loginModal').style.display = 'none';
-      setupUI();
-      loadCatalog().then(() => renderProducts());
+      pinInput.value = '';
+      await setupUI();
+      await loadCatalog();
+      renderProducts();
     } else {
-      showAlert('Невірний PIN', 'error');
+      loginError.style.display = 'block';
+      pinInput.style.borderColor = '#ff6b6b';
+      pinInput.value = '';
+      pinInput.focus();
+    }
+  }
+  
+  function togglePassword() {
+    const pinInput = document.getElementById('adminPin');
+    const toggleBtn = document.getElementById('togglePassword');
+    
+    if (pinInput.type === 'password') {
+      pinInput.type = 'text';
+      toggleBtn.textContent = '🔒';
+    } else {
+      pinInput.type = 'password';
+      toggleBtn.textContent = '👁️';
     }
   }
 
@@ -1431,6 +1457,7 @@ window.Admin = (function() {
     init,
     login,
     logout,
+    togglePassword,
     showPanel,
     newProduct,
     editProduct,
